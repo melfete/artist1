@@ -1,0 +1,184 @@
+button {
+    background: linear-gradient(45deg, rgb(49, 0, 0), black);
+    color: white;
+    font-family: 'Trebuchet MS', Arial, sans-serif;
+    padding: 15px 30px;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: transform 0.3s ease, background 0.3s ease, box-shadow 0.3s ease;
+    font-size: 1.2rem;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.6);
+}
+
+button:hover {
+    transform: translateY(-3px);
+    background: linear-gradient(45deg, rgb(49, 0, 0), #1a1a1a);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
+}
+
+.button-container {
+    display: flex;
+    justify-content: space-around;
+    width: 50%;
+    margin: 20px 0;
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(45deg, #000000, rgb(12, 0, 0)); 
+    overflow-x: hidden;
+    margin: 0; 
+    min-height: 100vh;
+}
+
+h1 {
+    color: white;
+    text-align: center;
+    font-family: 'Trebuchet MS', Arial, sans-serif;
+    font-size: 3rem;
+    margin: 20px 0;
+    text-shadow: 2px 2px 12px rgba(0, 0, 0, 0.7); 
+}
+
+.carousel {
+    width: 700px;
+    padding: 30px 0;
+    margin-top: 60px;
+    border-radius: 5px;
+    box-shadow: 20px 35px black(0, 0, 0, 0.5);
+}
+
+.image-container {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: 250px;
+    justify-items: stretch;
+    animation: animation 12s linear infinite;
+}
+
+.image-container img {
+    width: 200px;
+    height: 270px;
+    border-radius: 50px;
+    object-fit: cover;
+    border: 1px solid #a5b1c2;
+}
+
+@keyframes animation {
+    to {
+        translate: calc(-4*400px);
+    }
+}
+
+#news {
+    display: flex; 
+    justify-content: space-around;  
+    align-items: flex-start; 
+    min-height: 400px;
+    padding: 20px 0;
+    flex-wrap: wrap;
+}
+
+#news div {
+    background: linear-gradient(45deg, #1a1a1a, rgb(49, 0, 0));
+    color: white;
+    text-align: center;
+    font-family: 'Trebuchet MS', Arial, sans-serif;
+    padding: 30px;
+    margin: 0 10px;
+    border-radius: 15px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5); 
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    width: 300px;
+    flex-grow: 0;
+}
+
+#news div:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.6); 
+}
+
+#news div h2 {
+    font-size: 1.8rem;
+    margin-bottom: 15px;
+    font-weight: bold;
+    letter-spacing: 1px;
+}
+
+#news div p {
+    font-size: 1.1rem;
+    font-weight: 500;
+    line-height: 1.5;
+}
+
+#faq {
+    background-color: #000000;
+    padding: 40px 20px;
+    color: white;
+    text-align: center;
+    font-family: 'Trebuchet MS', Arial, sans-serif;
+    width: 100%;
+    box-sizing: border-box;
+    margin-top: 40px;
+    border-top: 3px solid #ffffff;
+}
+
+#faq h2 {
+    font-size: 2.5rem;
+    margin-bottom: 30px;
+    font-weight: bold;
+    color: #ffffff;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    border-bottom: 2px solid #ffffff;
+    padding-bottom: 10px;
+}
+
+.faq-item {
+    margin-bottom: 20px;
+}
+
+.faq-question {
+    background-color: #000000;
+    color: white;
+    border: none;
+    padding: 20px;
+    font-size: 1.2rem;
+    width: 100%;
+    text-align: left;
+    cursor: pointer;
+    border-radius: 10px;
+    transition: background 0.3s ease, transform 0.3s ease;
+    margin-top: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+}
+
+.faq-question:hover {
+    background-color: #444;
+    transform: translateY(-5px);
+    box-shadow: 0 8px 12px rgba(0, 0, 0, 0.3);
+}
+
+.faq-answer {
+    display: none;
+    background-color: #000000;
+    color: white;
+    padding: 20px;
+    margin-top: 15px;
+    border-radius: 8px;
+    transition: max-height 0.3s ease-in-out;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+}
+
+.faq-answer p {
+    font-size: 1.1rem;
+    line-height: 1.6;
+}
+
+.faq-item.active .faq-answer {
+    display: block;
+}

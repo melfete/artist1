@@ -1,0 +1,118 @@
+body {
+    font-family: 'Trebuchet MS';
+    color: white;
+    text-align: center;
+    margin: 0;
+    padding: 0;
+    background-image: url('Download.jpeg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    height: 100vh;
+    display: flex;
+    justify-content: center; 
+    align-items: center; 
+    margin: 0;
+}
+
+.container {
+    max-width: 600px;
+    margin: 50px auto;
+    padding: 50px;
+    background: linear-gradient(to top, #350101, #000000);
+    padding: 10px;
+    border-radius: 10px;
+    box-shadow: 19px 23px 43px 19px rgba(0,0,0,1);
+    -webkit-box-shadow: 19px 23px 43px 19px rgba(0,0,0,1);
+    -moz-box-shadow: 19px 23px 43px 19px rgba(0,0,0,1);
+}
+
+h1 {
+    font-size: 2em;
+}
+
+.highlight {
+    color: #008000;
+}
+
+.highlight.lower {
+    color: #ff0000;
+}
+
+.playbutton {
+    background-color: #187905;
+    color: white;
+    font-weight: bold;
+    border: none;
+    padding: 10px 20px;
+    margin: 10px;
+    cursor: pointer;
+    font-size: 2em;
+    border-radius: 5px;
+    width: 15rem;
+}
+
+
+.zurückbutton{
+    background-color: #ff0000;
+    color: white;
+    font-weight: bold;
+    border: none;
+    padding: 10px 20px;
+    margin: 10px;
+    cursor: pointer;
+    font-size: 2em;
+    border-radius: 5px;
+    width: 15rem;
+}
+
+
+
+.playbutton:hover {
+    background-color: #34961b;
+}
+
+.zurückbutton:hover {
+    background-color: #ee3434;
+}
+
+
+
+.logo {
+    width: 300px; 
+    display: block;
+    margin: 0 auto;
+   
+}
+
+.title {
+    font-size: 32px;
+    font-weight: bold;
+    text-align: center;
+}
+
+.green {
+    color: #4CAF50;
+}
+
+.red {
+    color: #F44336;
+}
+
+.h2{
+    font-size: 24px;
+}
+
+.game_over{
+    width: 540px;
+    height: 650px;
+    margin: 50px auto;
+    padding: 50px;
+    background: linear-gradient(to top, #350101, #000000);
+    padding: 10px;
+    border-radius: 10px;
+    box-shadow: 19px 23px 43px 19px rgba(0,0,0,1);
+    -webkit-box-shadow: 19px 23px 43px 19px rgba(0,0,0,1);
+    -moz-box-shadow: 19px 23px 43px 19px rgba(0,0,0,1);
+}
+
