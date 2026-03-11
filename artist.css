@@ -1,0 +1,117 @@
+body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(45deg, #000000, rgb(12, 0, 0)); 
+    overflow-x: hidden;
+    margin: 0; 
+    min-height: 100vh;
+    font-family: 'Trebuchet MS', Arial, sans-serif;
+}
+button {
+    background: linear-gradient(45deg, rgb(49, 0, 0), black);
+    color: white;
+    font-family: 'Trebuchet MS', Arial, sans-serif;
+    padding: 15px 30px;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: transform 0.3s ease, background 0.3s ease, box-shadow 0.3s ease;
+    font-size: 1.2rem;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.6);
+}
+
+button:hover {
+    transform: translateY(-3px);
+    background: linear-gradient(45deg, rgb(49, 0, 0), #1a1a1a);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
+}
+
+h1 {
+    color: white;
+    text-align: center;
+    font-size: 3rem;
+    margin: 20px 0;
+    text-shadow: 2px 2px 12px rgba(0, 0, 0, 0.7);
+}
+
+.artist-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: linear-gradient(45deg, rgb(49, 0, 0), #1a1a1a);
+    color: white;
+    padding: 20px;
+    margin: 15px 0;
+    border-radius: 15px;
+    width: 80%;
+    max-width: 1200px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.artist-container:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.6);
+}
+
+.artist-text {
+    width: 60%;
+}
+
+.artist-text p {
+    font-size: 1.1rem;
+    margin: 10px 0;
+    font-weight: 500;
+}
+
+.artist-text strong {
+    color: #f39c12;
+}
+
+.artist-image {
+    width: 35%;
+    text-align: center;
+}
+
+.artist-image img {
+    width: 200px;
+    height: 270px;
+    object-fit: cover;
+    border-radius: 15px;
+    border: 2px solid #f39c12;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+}
+
+.artist-container:nth-child(even) {
+    background: linear-gradient(45deg, rgb(49, 0, 0), #1a1a1a);
+}
+
+.artist-container:nth-child(odd) {
+    background: linear-gradient(45deg, #1a1a1a, rgb(49, 0, 0));
+}
+
+@media (max-width: 768px) {
+    .artist-container {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .artist-text {
+        width: 100%;
+        margin-bottom: 15px;
+    }
+
+    .artist-image {
+        width: 100%;
+        text-align: center;
+    }
+
+    .artist-image img {
+        width: 100%;
+        max-width: 200px;
+        height: auto;
+    }
+}
+
