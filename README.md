@@ -14,7 +14,6 @@ Das Spiel ist online über **InfinityFree** erreichbar. Klicke auf den Link, um 
 | :---: | :---: |
 | ![Startseite](image/startseite_vorschau.png) | ![Gameplay](image/game_vorschau.png) |
 
-*(Tipp: Um die Bilder anzuzeigen, mache Screenshots vom Spiel, nenne sie wie oben und lade sie in den Ordner `image/` hoch.)*
 
 ## 🎮 Features
 
