@@ -7,7 +7,6 @@ Ein interaktives Web-Spiel basierend auf Spotify-Streaming-Daten. Teste dein Wis
 Das Spiel ist online über **InfinityFree** erreichbar. Klicke auf den Link, um direkt im Browser zu spielen:
 
 👉 [**ZUM LIVE-SPIEL BEI INFINITYFREE**]([http://deine-infinityfree-url.de](http://artist-quiz.wuaze.com/))
-*(Hinweis: Ersetze diesen Link durch deine echte InfinityFree-Adresse)*
 
 ## 📸 Preview
 
