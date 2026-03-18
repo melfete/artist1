@@ -1,14 +1,19 @@
 <?php
-if ($_SERVER['REMOTE_ADDR'] == '127.0.0.1' || $_SERVER['HTTP_HOST'] == 'localhost') {
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
+$isLocal = ($_SERVER['HTTP_HOST'] == 'localhost' || $_SERVER['REMOTE_ADDR'] == '127.0.0.1');
+
+if ($isLocal) {
     $host = "localhost";
     $user = "root";
     $pass = "";
     $dbname = "projektm"; 
 } else {
-    $host = "sqlXXX.infinityfree.com"; 
-    $user = "if0_XXXXXXXX";           
-    $pass = "DEINpvaN0SHDgBN4ixg";          
-    $dbname = "if0_XXXXXXXX_db_quiz"; 
+    $host = "sql207.infinityfree.com"; 
+    $user = "if0_41364848";           
+    $pass = "pvaN0SHDgBN4ixg"; 
+    $dbname = "if0_41364848_artists"; 
 }
 
 $conn = new mysqli($host, $user, $pass, $dbname);

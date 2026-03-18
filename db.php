@@ -1,16 +1,19 @@
 <?php
 session_start(); 
 
-if (!isset($_SESSION["score"])) {
-    $_SESSION["score"] = 0;
-}
+if ($_SERVER['REMOTE_ADDR'] == '127.0.0.1' || $_SERVER['HTTP_HOST'] == 'localhost') {
+    $host = "localhost";
+    $user = "root";
+    $pass = "";
+    $dbname = "projektm"; 
+} else {
+    $host = "sql207.infinityfree.com"; 
+    $user = "if0_41364848";           
+    $pass = "pvaN0SHDgBN4ixg";          
+    $dbname = "if0_41364848_db_quiz"; 
+}    
 
-$servername = "localhost"; 
-$username = "root"; 
-$password = ""; 
-$dbname = "higher_lower"; 
-
-$conn = new mysqli($servername, $username, $password, $dbname);
+$conn = new mysqli($host, $user, $pass, $dbname);
 
 
 if ($conn->connect_error) {
