@@ -1,35 +1,7 @@
 <?php
 require_once 'security.php';
+require_once 'helpers.php';
 include 'db_connect.php';
-
-function findCarouselImage($name) {
-    $search  = array('Ä', 'Ö', 'Ü', 'ä', 'ö', 'ü', 'ß', 'é', 'è', 'ê', 'á', 'à', 'â', 'í', 'ì', 'î', 'ó', 'ò', 'ô', 'ú', 'ù', 'û', 'ñ');
-    $replace = array('ae', 'oe', 'ue', 'ae', 'oe', 'ue', 'ss', 'e', 'e', 'e', 'a', 'a', 'a', 'i', 'i', 'i', 'o', 'o', 'o', 'u', 'u', 'u', 'n');
-    $cleanName = str_replace($search, $replace, $name);
-
-    $formatted = str_replace(' ', '', $cleanName);
-    $formatted = str_replace('.', '', $formatted);
-    $formatted = strtolower($formatted);
-    
-    $extensions = ['png', 'jpg', 'jpeg', 'webp', 'JPG', 'PNG'];
-    
-    foreach ($extensions as $ext) {
-        $path = "image/" . $formatted . "." . $ext;
-        if (file_exists($path)) {
-            return $path;
-        }
-    }
-
-    $formattedUnderscore = str_replace(' ', '_', strtolower($cleanName));
-    foreach ($extensions as $ext) {
-        $path = "image/" . $formattedUnderscore . "." . $ext;
-        if (file_exists($path)) {
-            return $path;
-        }
-    }
-
-    return "image/placeholder.jpg";
-}
 
 $carouselArtists = [
     "reezy", "Kendrick Lamar", "Michael Jackson", "RIN", "Jazeek", 
@@ -226,7 +198,7 @@ $carouselArtists = [
         <?php
         for ($i = 0; $i < 2; $i++) {
             foreach ($carouselArtists as $artist) {
-                $path = findCarouselImage($artist);
+                $path = find_artist_image($artist);
                 echo '<img src="' . e($path) . '" alt="' . e($artist) . '">';
             }
         }
