@@ -1,5 +1,6 @@
 <?php
 require_once 'security.php';
+require_once 'helpers.php';
 start_secure_session();
 
 include 'db_connect.php';
@@ -23,35 +24,6 @@ if (!isset($_SESSION["score"])) {
     $_SESSION["score"] = 0;
 }
 
-function findExistingImage($name) {
-    $search  = array('Ä', 'Ö', 'Ü', 'ä', 'ö', 'ü', 'ß', 'é', 'è', 'ê', 'á', 'à', 'â', 'í', 'ì', 'î', 'ó', 'ò', 'ô', 'ú', 'ù', 'û', 'ñ');
-    $replace = array('ae', 'oe', 'ue', 'ae', 'oe', 'ue', 'ss', 'e', 'e', 'e', 'a', 'a', 'a', 'i', 'i', 'i', 'o', 'o', 'o', 'u', 'u', 'u', 'n');
-    $cleanName = str_replace($search, $replace, $name);
-
-    $formatted = str_replace(' ', '', $cleanName);
-    $formatted = str_replace('.', '', $formatted);
-    $formatted = str_replace('-', '', $formatted);
-    $formatted = strtolower($formatted);
-    
-    $extensions = ['png', 'jpg', 'jpeg', 'webp', 'JPG', 'PNG'];
-    
-    foreach ($extensions as $ext) {
-        $path = "image/" . $formatted . "." . $ext;
-        if (file_exists($path)) {
-            return $path;
-        }
-    }
-
-    $formattedUnderscore = str_replace(' ', '_', strtolower($cleanName));
-    foreach ($extensions as $ext) {
-        $path = "image/" . $formattedUnderscore . "." . $ext;
-        if (file_exists($path)) {
-            return $path;
-        }
-    }
-
-    return "image/logo.png";
-}
 
 if (!isset($_SESSION["current_artist"])) {
     // Neues Spiel: zwei verschiedene Künstler ziehen
@@ -84,8 +56,8 @@ if (!isset($_SESSION["next_artist"])
 $artist1 = $_SESSION["current_artist"];
 $artist2 = $_SESSION["next_artist"];
 
-$image1 = findExistingImage($artist1["künstler_name"]);
-$image2 = findExistingImage($artist2["künstler_name"]);
+$image1 = find_artist_image($artist1["künstler_name"]);
+$image2 = find_artist_image($artist2["künstler_name"]);
 
 $streams1 = isset($artist1["künstler_streams"]) ? (int)$artist1["künstler_streams"] : 0;
 

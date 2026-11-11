@@ -2,67 +2,59 @@
 require_once 'security.php';
 include 'db_connect.php';
 
-// Ersetzt artist1.php … artist9.php: artist.php?id=1 … artist.php?id=9
-$id = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT, ['options' => ['min_range' => 1, 'max_range' => 9]]);
+// Künstlerseite: artist.php?id=1 … (Daten aus `artists` + `albums`, siehe db/migrations/001)
+$id = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]);
 if (!$id) {
     header('Location: artists.php');
     exit();
 }
 
-// Tabellennamen lassen sich nicht als Prepared-Statement-Parameter übergeben,
-// deshalb nur aus der geprüften Zahl 1–9 zusammensetzen.
-$result = $conn->query('SELECT * FROM `artist' . $id . '`');
-$rows = $result ? $result->fetch_all(MYSQLI_ASSOC) : [];
+$stmt = $conn->prepare(
+    'SELECT name, age, streams_mio, most_streamed, newest_song, image_path FROM artists WHERE id = ?'
+);
+$stmt->bind_param('i', $id);
+$stmt->execute();
+$artist = $stmt->get_result()->fetch_assoc();
+$stmt->close();
+
+$albums = [];
+if ($artist) {
+    $stmt = $conn->prepare('SELECT title FROM albums WHERE artist_id = ? ORDER BY position');
+    $stmt->bind_param('i', $id);
+    $stmt->execute();
+    $albums = array_column($stmt->get_result()->fetch_all(MYSQLI_ASSOC), 'title');
+    $stmt->close();
+}
 $conn->close();
 
-function picture_data_uri(string $blob): string
-{
-    $mime = 'image/jpeg';
-    if (function_exists('finfo_open')) {
-        $detected = finfo_buffer(finfo_open(FILEINFO_MIME_TYPE), $blob);
-        if (is_string($detected) && strpos($detected, 'image/') === 0) {
-            $mime = $detected;
-        }
-    }
-    return 'data:' . $mime . ';base64,' . base64_encode($blob);
+if (!$artist) {
+    http_response_code(404);
 }
-
-$title = $rows ? $rows[0]['name'] : 'Künstler';
 ?>
 <!DOCTYPE html>
 <html lang="de">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?= e($title) ?></title>
+    <title><?= e($artist['name'] ?? 'Künstler nicht gefunden') ?></title>
     <link rel="stylesheet" href="artist.css">
 </head>
 <body>
 
-<?php if (!$rows): ?>
+<?php if (!$artist): ?>
     <p>No Artist found</p>
-<?php endif; ?>
-
-<?php foreach ($rows as $row): ?>
+<?php else: ?>
     <div class="artist-container">
         <div class="artist-text">
-            <p><strong>Name:</strong> <?= e($row['name']) ?></p>
-            <p><strong>Age:</strong> <?= e($row['age']) ?></p>
-            <p><strong>Streams:</strong> <?= isset($row['streams']) ? e($row['streams']) : 'N/A' ?></p>
-            <p><strong>Most Streamed:</strong> <?= e($row['most_streamed']) ?></p>
+            <p><strong>Name:</strong> <?= e($artist['name']) ?></p>
+            <p><strong>Age:</strong> <?= e($artist['age']) ?></p>
+            <p><strong>Streams:</strong> <?= e($artist['streams_mio']) ?></p>
+            <p><strong>Most Streamed:</strong> <?= e($artist['most_streamed']) ?></p>
 
-            <?php if (!empty($row['newessong'])): ?>
-                <p><strong>Newest Song:</strong> <?= e($row['newessong']) ?></p>
+            <?php if (!empty($artist['newest_song'])): ?>
+                <p><strong>Newest Song:</strong> <?= e($artist['newest_song']) ?></p>
             <?php endif; ?>
 
-            <?php
-            $albums = [];
-            for ($i = 1; $i <= 10; $i++) {
-                if (!empty($row['album' . $i])) {
-                    $albums[] = $row['album' . $i];
-                }
-            }
-            ?>
             <?php if ($albums): ?>
                 <p><strong>Albums:</strong></p>
                 <?php foreach ($albums as $album): ?>
@@ -71,13 +63,11 @@ $title = $rows ? $rows[0]['name'] : 'Künstler';
             <?php endif; ?>
         </div>
 
-        <?php if (!empty($row['picture'])): ?>
-            <div class="artist-image">
-                <img src="<?= picture_data_uri($row['picture']) ?>" width="200" alt="<?= e($row['name']) ?>">
-            </div>
-        <?php endif; ?>
+        <div class="artist-image">
+            <img src="<?= e($artist['image_path']) ?>" width="200" alt="<?= e($artist['name']) ?>">
+        </div>
     </div>
-<?php endforeach; ?>
+<?php endif; ?>
 
 <form action="artists.php">
     <button>Back</button>

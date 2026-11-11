@@ -1,35 +1,7 @@
 <?php
 require_once 'security.php';
+require_once 'helpers.php';
 include 'db_connect.php';
-
-function findExistingImage($name) {
-    $search  = array('Ä', 'Ö', 'Ü', 'ä', 'ö', 'ü', 'ß', 'é', 'è', 'ê', 'á', 'à', 'â', 'í', 'ì', 'î', 'ó', 'ò', 'ô', 'ú', 'ù', 'û', 'ñ');
-    $replace = array('ae', 'oe', 'ue', 'ae', 'oe', 'ue', 'ss', 'e', 'e', 'e', 'a', 'a', 'a', 'i', 'i', 'i', 'o', 'o', 'o', 'u', 'u', 'u', 'n');
-    $cleanName = str_replace($search, $replace, $name);
-
-    $formatted = str_replace(' ', '', $cleanName);
-    $formatted = str_replace('.', '', $formatted);
-    $formatted = strtolower($formatted);
-    
-    $extensions = ['png', 'jpg', 'jpeg', 'webp'];
-    
-    foreach ($extensions as $ext) {
-        $path = "image/" . $formatted . "." . $ext;
-        if (file_exists($path)) {
-            return $path;
-        }
-    }
-
-    $formattedUnderscore = str_replace(' ', '_', strtolower($cleanName));
-    foreach ($extensions as $ext) {
-        $path = "image/" . $formattedUnderscore . "." . $ext;
-        if (file_exists($path)) {
-            return $path;
-        }
-    }
-
-    return null;
-}
 
 $sql = "SELECT künstler_name FROM `künstler` ORDER BY künstler_name ASC";
 $result = $conn->query($sql);
@@ -43,7 +15,7 @@ if ($result && $result->num_rows > 0) {
 
         $comparisonKey = strtolower(preg_replace('/[^a-zA-Z0-9]/', '', $originalName));
         
-        $currentImagePath = findExistingImage($originalName);
+        $currentImagePath = find_artist_image($originalName, null);
         $foundMatchKey = null;
 
         if (isset($uniqueArtists[$comparisonKey])) {
@@ -60,10 +32,10 @@ if ($result && $result->num_rows > 0) {
         if ($foundMatchKey === null) {
             $uniqueArtists[$comparisonKey] = [
                 'name' => $originalName,
-                'image' => $currentImagePath ?? "image/placeholder.jpg"
+                'image' => $currentImagePath ?? DEFAULT_ARTIST_IMAGE
             ];
         } else {
-            if ($uniqueArtists[$foundMatchKey]['image'] === "image/placeholder.jpg" && $currentImagePath !== null) {
+            if ($uniqueArtists[$foundMatchKey]['image'] === DEFAULT_ARTIST_IMAGE && $currentImagePath !== null) {
                 $uniqueArtists[$foundMatchKey]['image'] = $currentImagePath;
                 $uniqueArtists[$foundMatchKey]['name'] = $originalName;
             }
