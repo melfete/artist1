@@ -252,7 +252,9 @@ $carouselArtists = [
     <div class="faq-item">
         <button class="faq-question">Wer hat an diesem Projekt gearbeitet? <span>+</span></button>
         <div class="faq-answer">
-            <p>Saltuk Kalender</p>
+            <p><strong>Saltuk Kalender</strong>: Music Player sowie spätere Überarbeitung und Verbesserungen</p>
+            <p><strong>Chris</strong>: Higher Lower Game</p>
+            <p><strong>Yuki</strong>: Startseite</p>
         </div>
     </div>
 </div>
