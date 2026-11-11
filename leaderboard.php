@@ -1,17 +1,8 @@
 <?php
 session_start();
+include 'db_connect.php';
 
-$servername = "localhost";
-$username = "root";
-$password = "";
-$dbname = "higher_lower";
-
-$conn = new mysqli($servername, $username, $password, $dbname);
-if ($conn->connect_error) {
-    die("Verbindung fehlgeschlagen: " . $conn->connect_error);
-}
-
-$sql = "SELECT name, score FROM leaderboard ORDER BY score DESC ";
+$sql = "SELECT name, score FROM leaderboard ORDER BY score DESC LIMIT 50";
 $result = $conn->query($sql);
 ?>
 
@@ -28,7 +19,7 @@ $result = $conn->query($sql);
     <div class="leaderboard">
         <div class="top-section">
             <h1>Leaderboard</h1>
-            <button class="playbutton" onclick="window.location.href='higher_lower_game.php';">Nochmal spielen</button>
+            <button class="playbutton" onclick="window.location.href='higher_lower_game.php?action=reset';">Nochmal spielen</button>
         </div>
 
         <div class="table-container">
@@ -43,8 +34,8 @@ $result = $conn->query($sql);
                 <tbody>
                     <?php
                     $rank = 1;
-                    while ($row = $result->fetch_assoc()) {
-                        echo "<tr><td>{$rank}</td><td>" . htmlspecialchars($row["name"]) . "</td><td>{$row["score"]}</td></tr>";
+                    while ($result && $row = $result->fetch_assoc()) {
+                        echo "<tr><td>{$rank}</td><td>" . htmlspecialchars($row["name"]) . "</td><td>" . (int)$row["score"] . "</td></tr>";
                         $rank++;
                     }
                     ?>

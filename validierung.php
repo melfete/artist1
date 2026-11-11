@@ -1,32 +1,37 @@
 <?php
-session_start(); 
+session_start();
+include 'db_connect.php';
 
-$servername = "localhost";
-$username = "root";
-$password = "";
-$dbname = "higher_lower";
+// Speichern nur nach beendetem Spiel, nur einmal, und nur mit dem Score aus der Session
+$canSave = !empty($_SESSION["game_over"])
+        && empty($_SESSION["score_saved"])
+        && isset($_SESSION["score"])
+        && (int)$_SESSION["score"] > 0;
 
-$conn = new mysqli($servername, $username, $password, $dbname);
+$score = $canSave ? (int)$_SESSION["score"] : 0;
+$error = "";
+$player_name = "";
 
-if ($conn->connect_error) {
-    die("Verbindung fehlgeschlagen: " . $conn->connect_error);
-}
+if ($canSave && $_SERVER["REQUEST_METHOD"] === "POST") {
+    $player_name = trim($_POST["player_name"] ?? "");
+    $nameLength = mb_strlen($player_name);
 
-if ($_SERVER["REQUEST_METHOD"] === "POST") {
-    $player_name = trim($_POST["player_name"]);
-    $score = isset($_POST["score_count"]) ? intval($_POST["score_count"]) : 0; 
-
-    if (!empty($player_name) && !empty($score)) {
+    if ($nameLength < 1 || $nameLength > 30) {
+        $error = "Bitte einen Namen mit 1–30 Zeichen eingeben!";
+    } else {
         $stmt = $conn->prepare("INSERT INTO leaderboard (name, score) VALUES (?, ?)");
         $stmt->bind_param("si", $player_name, $score);
-        
+
         if ($stmt->execute()) {
-            header("Location: leaderboard.php"); 
+            $_SESSION["score_saved"] = true;
+            $stmt->close();
+            $conn->close();
+            header("Location: leaderboard.php");
             exit;
-        } else {
-            echo "Fehler beim Speichern des Scores: " . $conn->error;
         }
 
+        error_log("Score speichern fehlgeschlagen: " . $stmt->error);
+        $error = "Der Score konnte nicht gespeichert werden.";
         $stmt->close();
     }
 }
@@ -40,49 +45,34 @@ $conn->close();
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Validierung</title>
     <link rel="stylesheet" href="validierung.css">
-    <script>
-        function validateForm(event) {
-            var name = document.forms["scoreForm"]["player_name"].value;
-            var score = document.forms["scoreForm"]["score_count"].value;
-            var submitButton = document.getElementById("submitBtn");
-            var errorMessage = document.getElementById("errorMessage");
-
-            if (name == "" || score == "") {
-                errorMessage.style.display = "block"; 
-                submitButton.disabled = true; 
-                event.preventDefault(); 
-            } else {
-                submitButton.disabled = false; 
-                errorMessage.style.display = "none"; 
-            }
-        }
-    </script>
 </head>
 <body>
     <div class="game_over">
         <div class="logo-container">
-            <img src="logoHigherLower.png" alt="Higher Lower Logo" class="logo">
+            <img src="LogoHigherLower.png" alt="Higher Lower Logo" class="logo">
         </div>
         <h1 class="game-over">Validierung</h1>
-        <h2 class="score">Gib deinen Namen und Score ein:</h2>
-        
-        <form method="POST" name="scoreForm" onsubmit="validateForm(event)">
-            <input type="text" name="player_name" placeholder="Dein Name">
-            <input type="number" name="score_count" min="0" placeholder="Dein Score">
-            <br><br>
-            
-           
-            <button class="sendebutton" type="submit" id="submitBtn" >Senden</button>
-            
-           
-            <button class="zurückbutton" onclick="window.location.href='higher_lower_game.php';">Zurück</button>
-        </form>
 
-        
-        <div id="errorMessage" style="color: red; display: none;">
-            <br>
-            Bitte Name und Score eingeben!
-        </div>
-    </div>  
+        <?php if ($canSave): ?>
+            <h2 class="score">Dein Score: <strong><?= $score ?></strong></h2>
+            <h2 class="score">Gib deinen Namen ein:</h2>
+
+            <form method="POST" name="scoreForm">
+                <input type="text" name="player_name" placeholder="Dein Name"
+                       maxlength="30" required value="<?= htmlspecialchars($player_name) ?>">
+                <br><br>
+                <button class="sendebutton" type="submit">Senden</button>
+                <button class="zurückbutton" type="button" onclick="window.location.href='higher_lower_game.php';">Zurück</button>
+            </form>
+
+            <?php if ($error !== ""): ?>
+                <div style="color: red;"><br><?= htmlspecialchars($error) ?></div>
+            <?php endif; ?>
+        <?php else: ?>
+            <h2 class="score">Es gibt keinen Score zum Speichern.</h2>
+            <button class="zurückbutton" type="button" onclick="window.location.href='higher_lower_game.php?action=reset';">Neues Spiel</button>
+            <button class="zurückbutton" type="button" onclick="window.location.href='leaderboard.php';">Leaderboard</button>
+        <?php endif; ?>
+    </div>
 </body>
 </html>

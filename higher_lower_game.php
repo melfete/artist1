@@ -8,6 +8,7 @@ if (isset($_GET['action']) && $_GET['action'] === 'reset') {
     unset($_SESSION["current_artist"]);
     unset($_SESSION["next_artist"]);
     unset($_SESSION["game_over"]);
+    unset($_SESSION["score_saved"]);
     header("Location: higher_lower_game.php");
     exit();
 }
@@ -43,29 +44,35 @@ function findExistingImage($name) {
         }
     }
 
-    return "image/placeholder.jpg";
+    return "image/logo.png";
 }
 
-if (!isset($_SESSION["current_artist"]) || !isset($_SESSION["next_artist"])) {
-    $sql = "SELECT * FROM `künstler` ORDER BY RAND() LIMIT 2";
-    $result = $conn->query($sql);
+if (!isset($_SESSION["current_artist"])) {
+    // Neues Spiel: zwei verschiedene Künstler ziehen
+    $result = $conn->query("SELECT * FROM `künstler` ORDER BY RAND() LIMIT 2");
 
     if ($result && $result->num_rows >= 2) {
         $artists = $result->fetch_all(MYSQLI_ASSOC);
-        $_SESSION["current_artist"] = $artists[0]; 
-        $_SESSION["next_artist"] = $artists[1]; 
+        $_SESSION["current_artist"] = $artists[0];
+        $_SESSION["next_artist"] = $artists[1];
     } else {
         die("Fehler: Datenbank unvollständig.");
     }
 }
 
-if ($_SESSION["current_artist"]["künstler_name"] === $_SESSION["next_artist"]["künstler_name"]) {
-    $currentName = $conn->real_escape_string($_SESSION["current_artist"]["künstler_name"]);
-    $sql = "SELECT * FROM `künstler` WHERE künstler_name != '$currentName' ORDER BY RAND() LIMIT 1";
-    $result = $conn->query($sql);
-    if ($result && $result->num_rows > 0) {
-        $_SESSION["next_artist"] = $result->fetch_assoc();
+if (!isset($_SESSION["next_artist"])
+    || $_SESSION["current_artist"]["künstler_name"] === $_SESSION["next_artist"]["künstler_name"]) {
+    // Nach richtiger Antwort: aktuellen Künstler behalten, nur einen neuen Gegner ziehen
+    $stmt = $conn->prepare("SELECT * FROM `künstler` WHERE künstler_name <> ? ORDER BY RAND() LIMIT 1");
+    $stmt->bind_param("s", $_SESSION["current_artist"]["künstler_name"]);
+    $stmt->execute();
+    $row = $stmt->get_result()->fetch_assoc();
+    $stmt->close();
+
+    if (!$row) {
+        die("Fehler: Kein neuer Künstler gefunden.");
     }
+    $_SESSION["next_artist"] = $row;
 }
 
 $artist1 = $_SESSION["current_artist"];
@@ -75,7 +82,6 @@ $image1 = findExistingImage($artist1["künstler_name"]);
 $image2 = findExistingImage($artist2["künstler_name"]);
 
 $streams1 = isset($artist1["künstler_streams"]) ? (int)$artist1["künstler_streams"] : 0;
-$streams2 = isset($artist2["künstler_streams"]) ? (int)$artist2["künstler_streams"] : 0;
 
 $isGameOver = isset($_SESSION["game_over"]) && $_SESSION["game_over"] === true;
 ?>
@@ -274,6 +280,9 @@ $isGameOver = isset($_SESSION["game_over"]) && $_SESSION["game_over"] === true;
             
             <div class="action-buttons">
                 <a href="higher_lower_game.php?action=reset" class="btn-link btn-restart">NOCHMAL SPIELEN</a>
+                <?php if ((int)$_SESSION["score"] > 0 && empty($_SESSION["score_saved"])): ?>
+                    <a href="validierung.php" class="btn-link btn-secondary">SCORE SPEICHERN</a>
+                <?php endif; ?>
                 <a href="index.php" class="btn-link btn-secondary">ZUM HAUPTMENÜ</a>
             </div>
         </div>
@@ -311,8 +320,6 @@ $isGameOver = isset($_SESSION["game_over"]) && $_SESSION["game_over"] === true;
 
 <div class="controls">
     <form method="post" action="check_answer.php">
-        <input type="hidden" name="artist1_streams" value="<?= $streams1 ?>">
-        <input type="hidden" name="artist2_streams" value="<?= $streams2 ?>">
         <button type="submit" name="guess" value="higher" class="btn-higher">HÖHER ▲</button>
         <button type="submit" name="guess" value="lower" class="btn-lower">TIEFER ▼</button>
     </form>
