@@ -1,4 +1,5 @@
 <?php
+require_once 'security.php';
 include 'db_connect.php';
 
 function findExistingImage($name) {
@@ -161,9 +162,9 @@ if ($result && $result->num_rows > 0) {
             ?>
             <div class="artist-card">
                 <div class="image-container">
-                    <img src="<?= $artistData['image'] ?>" alt="<?= htmlspecialchars($artistData['name']) ?>">
+                    <img src="<?= e($artistData['image']) ?>" alt="<?= e($artistData['name']) ?>">
                 </div>
-                <div class="artist-name"><?= htmlspecialchars($artistData['name']) ?></div>
+                <div class="artist-name"><?= e($artistData['name']) ?></div>
             </div>
             <?php
         }

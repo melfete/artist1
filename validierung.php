@@ -1,5 +1,6 @@
 <?php
-session_start();
+require_once 'security.php';
+start_secure_session();
 include 'db_connect.php';
 
 // Speichern nur nach beendetem Spiel, nur einmal, und nur mit dem Score aus der Session
@@ -16,7 +17,9 @@ if ($canSave && $_SERVER["REQUEST_METHOD"] === "POST") {
     $player_name = trim($_POST["player_name"] ?? "");
     $nameLength = mb_strlen($player_name);
 
-    if ($nameLength < 1 || $nameLength > 30) {
+    if (!csrf_valid($_POST["csrf_token"] ?? null)) {
+        $error = "Sitzung abgelaufen – bitte erneut absenden.";
+    } elseif ($nameLength < 1 || $nameLength > 30) {
         $error = "Bitte einen Namen mit 1–30 Zeichen eingeben!";
     } else {
         $stmt = $conn->prepare("INSERT INTO leaderboard (name, score) VALUES (?, ?)");
@@ -58,8 +61,9 @@ $conn->close();
             <h2 class="score">Gib deinen Namen ein:</h2>
 
             <form method="POST" name="scoreForm">
+                <?= csrf_field() ?>
                 <input type="text" name="player_name" placeholder="Dein Name"
-                       maxlength="30" required value="<?= htmlspecialchars($player_name) ?>">
+                       maxlength="30" required value="<?= e($player_name) ?>">
                 <br><br>
                 <button class="sendebutton" type="submit">Senden</button>
                 <button class="zurückbutton" type="button" onclick="window.location.href='higher_lower_game.php';">Zurück</button>
@@ -70,7 +74,7 @@ $conn->close();
             <?php endif; ?>
         <?php else: ?>
             <h2 class="score">Es gibt keinen Score zum Speichern.</h2>
-            <button class="zurückbutton" type="button" onclick="window.location.href='higher_lower_game.php?action=reset';">Neues Spiel</button>
+            <button class="zurückbutton" type="button" onclick="window.location.href='higher_lower_game.php?action=reset&token=<?= e(csrf_token()) ?>';">Neues Spiel</button>
             <button class="zurückbutton" type="button" onclick="window.location.href='leaderboard.php';">Leaderboard</button>
         <?php endif; ?>
     </div>

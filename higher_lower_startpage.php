@@ -1,5 +1,6 @@
 <?php
-session_start(); 
+require_once 'security.php';
+start_secure_session();
 ?>
 <!DOCTYPE html>
 <html lang="de">
