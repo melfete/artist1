@@ -1,7 +1,8 @@
 <?php
-session_start();
+require_once 'security.php';
+start_secure_session();
 
-if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+if ($_SERVER['REQUEST_METHOD'] !== 'POST' || !csrf_valid($_POST['csrf_token'] ?? null)) {
     header('Location: higher_lower_game.php');
     exit();
 }

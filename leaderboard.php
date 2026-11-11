@@ -1,5 +1,6 @@
 <?php
-session_start();
+require_once 'security.php';
+start_secure_session();
 include 'db_connect.php';
 
 $sql = "SELECT name, score FROM leaderboard ORDER BY score DESC LIMIT 50";
@@ -19,7 +20,7 @@ $result = $conn->query($sql);
     <div class="leaderboard">
         <div class="top-section">
             <h1>Leaderboard</h1>
-            <button class="playbutton" onclick="window.location.href='higher_lower_game.php?action=reset';">Nochmal spielen</button>
+            <button class="playbutton" onclick="window.location.href='higher_lower_game.php?action=reset&token=<?= e(csrf_token()) ?>';">Nochmal spielen</button>
         </div>
 
         <div class="table-container">

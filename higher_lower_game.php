@@ -1,9 +1,15 @@
 <?php
-session_start(); 
+require_once 'security.php';
+start_secure_session();
 
-include 'db_connect.php'; 
+include 'db_connect.php';
 
 if (isset($_GET['action']) && $_GET['action'] === 'reset') {
+    if (!csrf_valid($_GET['token'] ?? null)) {
+        // Fremd ausgelöster oder veralteter Reset-Link: ignorieren
+        header("Location: higher_lower_game.php");
+        exit();
+    }
     $_SESSION["score"] = 0;
     unset($_SESSION["current_artist"]);
     unset($_SESSION["next_artist"]);
@@ -279,7 +285,7 @@ $isGameOver = isset($_SESSION["game_over"]) && $_SESSION["game_over"] === true;
             <p style="text-transform: uppercase; letter-spacing: 2px; color: #b3b3b3;">Punkte erreicht</p>
             
             <div class="action-buttons">
-                <a href="higher_lower_game.php?action=reset" class="btn-link btn-restart">NOCHMAL SPIELEN</a>
+                <a href="higher_lower_game.php?action=reset&amp;token=<?= e(csrf_token()) ?>" class="btn-link btn-restart">NOCHMAL SPIELEN</a>
                 <?php if ((int)$_SESSION["score"] > 0 && empty($_SESSION["score_saved"])): ?>
                     <a href="validierung.php" class="btn-link btn-secondary">SCORE SPEICHERN</a>
                 <?php endif; ?>
@@ -296,7 +302,7 @@ $isGameOver = isset($_SESSION["game_over"]) && $_SESSION["game_over"] === true;
         <div>
             <p style="color: #b3b3b3; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 1px;">Künstler 1</p>
             <div class="image-wrapper">
-                <img src="<?= $image1 ?>" alt="<?= htmlspecialchars($artist1["künstler_name"]) ?>">
+                <img src="<?= e($image1) ?>" alt="<?= htmlspecialchars($artist1["künstler_name"]) ?>">
             </div>
             <div class="artist-name"><?= htmlspecialchars($artist1["künstler_name"]) ?></div>
         </div>
@@ -309,7 +315,7 @@ $isGameOver = isset($_SESSION["game_over"]) && $_SESSION["game_over"] === true;
         <div>
             <p style="color: #b3b3b3; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 1px;">Künstler 2</p>
             <div class="image-wrapper">
-                <img src="<?= $image2 ?>" alt="<?= htmlspecialchars($artist2["künstler_name"]) ?>">
+                <img src="<?= e($image2) ?>" alt="<?= htmlspecialchars($artist2["künstler_name"]) ?>">
             </div>
             <div class="artist-name"><?= htmlspecialchars($artist2["künstler_name"]) ?></div>
         </div>
@@ -320,6 +326,7 @@ $isGameOver = isset($_SESSION["game_over"]) && $_SESSION["game_over"] === true;
 
 <div class="controls">
     <form method="post" action="check_answer.php">
+        <?= csrf_field() ?>
         <button type="submit" name="guess" value="higher" class="btn-higher">HÖHER ▲</button>
         <button type="submit" name="guess" value="lower" class="btn-lower">TIEFER ▼</button>
     </form>

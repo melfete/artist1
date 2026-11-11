@@ -1,4 +1,5 @@
 <?php
+require_once 'security.php';
 include 'db_connect.php';
 
 function findCarouselImage($name) {
@@ -226,7 +227,7 @@ $carouselArtists = [
         for ($i = 0; $i < 2; $i++) {
             foreach ($carouselArtists as $artist) {
                 $path = findCarouselImage($artist);
-                echo '<img src="' . $path . '" alt="' . htmlspecialchars($artist) . '">';
+                echo '<img src="' . e($path) . '" alt="' . e($artist) . '">';
             }
         }
         ?>
@@ -241,7 +242,7 @@ $carouselArtists = [
         $result = $conn->query($sql);
         if ($result && $result->num_rows > 0) {
             while($row = $result->fetch_assoc()) {
-                echo "<div class='news-item'><span class='rank'>#{$row['place']}</span> <span class='name'>" . htmlspecialchars($row['name']) . "</span> <span class='detail'>" . htmlspecialchars($row['artist']) . "</span></div>";
+                echo "<div class='news-item'><span class='rank'>#" . (int)$row['place'] . "</span> <span class='name'>" . htmlspecialchars($row['name']) . "</span> <span class='detail'>" . htmlspecialchars($row['artist']) . "</span></div>";
             }
         }
         ?>
@@ -254,7 +255,7 @@ $carouselArtists = [
         $result = $conn->query($sql);
         if ($result && $result->num_rows > 0) {
             while($row = $result->fetch_assoc()) {
-                echo "<div class='news-item'><span class='rank'>#{$row['place']}</span> <span class='name'>" . htmlspecialchars($row['name']) . "</span> <span class='detail'>" . htmlspecialchars($row['artist']) . "</span></div>";
+                echo "<div class='news-item'><span class='rank'>#" . (int)$row['place'] . "</span> <span class='name'>" . htmlspecialchars($row['name']) . "</span> <span class='detail'>" . htmlspecialchars($row['artist']) . "</span></div>";
             }
         }
         ?>
@@ -267,7 +268,7 @@ $carouselArtists = [
         $result = $conn->query($sql);
         if ($result && $result->num_rows > 0) {
             while($row = $result->fetch_assoc()) {
-                echo "<div class='news-item'><span class='rank'>#{$row['place']}</span> <span class='name'>" . htmlspecialchars($row['name']) . "</span> <span class='detail'>" . htmlspecialchars($row['streams']) . " Mio.</span></div>";
+                echo "<div class='news-item'><span class='rank'>#" . (int)$row['place'] . "</span> <span class='name'>" . htmlspecialchars($row['name']) . "</span> <span class='detail'>" . htmlspecialchars($row['streams']) . " Mio.</span></div>";
             }
         }
         ?>
