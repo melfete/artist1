@@ -57,6 +57,7 @@ Das Spiel ist online über **InfinityFree** erreichbar:
   Die Texte stehen unter der Lizenz [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/deed.de); jede Detailseite verlinkt den Quellartikel.
 
 Die Daten werden in der Tabelle `artists` gecacht und erst nach 7 Tagen neu abgerufen (`artist_api.php`).
+Die Top Songs der Startseite liegen 24 Stunden in der Tabelle `api_cache`.
 Ist eine API nicht erreichbar, bleiben die zuletzt gespeicherten Daten bzw. das lokale Bild aus `image/` stehen.
 Die Deezer-IDs sind in `003_external_api.sql` fest eingetragen. Bei mehrdeutigen Namen gibt die Spalte `wiki_title` den Wikipedia-Artikel vor (z. B. `de:Lalisa Manobal`).
 
