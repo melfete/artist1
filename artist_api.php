@@ -12,7 +12,7 @@ require_once __DIR__ . '/helpers.php';
 const ARTIST_CACHE_TTL = 7 * 24 * 3600;   // 7 Tage
 const API_TIMEOUT      = 5;               // Sekunden pro Anfrage
 const API_USER_AGENT   = 'ArtistQuiz/1.0 (https://artistquiz.rf.gd)';
-const DEEZER_BATCH     = 40;              // max. parallele Deezer-Anfragen (Limit: 50 pro 5 s)
+const ARTIST_REFRESH_BUDGET = 3.0;        // Sekunden, die die Übersicht pro Aufruf für Deezer nutzt
 const ARTIST_COLUMNS   = 'id, name, deezer_id, fans, image_url, bio, bio_url, wiki_title, updated_at, bio_updated_at,
                           age, streams_mio, most_streamed, newest_song, image_path';
 
@@ -76,42 +76,6 @@ function api_get_json(string $url): ?array
     $ch = api_curl_handle($url);
     $body = curl_exec($ch);
     return api_handle_result($ch, $url, $body);
-}
-
-/**
- * Mehrere GET-Anfragen gleichzeitig (curl_multi). Dauert so lange wie die langsamste Anfrage,
- * nicht wie alle zusammen. Rückgabe: gleiche Schlüssel wie $urls, Wert JSON-Array oder null.
- */
-function api_get_json_multi(array $urls): array
-{
-    $results = array_fill_keys(array_keys($urls), null);
-    if (!$urls || !function_exists('curl_multi_init')) {
-        return $results;
-    }
-
-    $mh = curl_multi_init();
-    $handles = [];
-    foreach ($urls as $key => $url) {
-        if (!api_host_blocked($url)) {
-            $handles[$key] = api_curl_handle($url);
-            curl_multi_add_handle($mh, $handles[$key]);
-        }
-    }
-
-    do {
-        $status = curl_multi_exec($mh, $running);
-        if ($running) {
-            curl_multi_select($mh, 1.0);
-        }
-    } while ($running && $status === CURLM_OK);
-
-    foreach ($handles as $key => $ch) {
-        $results[$key] = api_handle_result($ch, $urls[$key], curl_multi_getcontent($ch));
-        curl_multi_remove_handle($mh, $ch);
-    }
-    curl_multi_close($mh);
-
-    return $results;
 }
 
 /** Nur https-URLs übernehmen (Schutz vor unerwarteten Werten aus der API-Antwort). */
@@ -267,25 +231,23 @@ function artist_save_deezer(mysqli $conn, array $artist, array $deezer): array
 }
 
 /**
- * Lädt Fans/Bild aller veralteten Künstler in $artists neu – gleichzeitig statt nacheinander.
+ * Lädt Fans/Bild der veralteten Künstler in $artists neu, die ältesten zuerst.
+ * Gleichzeitige Anfragen gehen nicht (InfinityFree sperrt curl_multi_exec), daher nacheinander,
+ * aber höchstens $budget Sekunden lang – der Rest folgt beim nächsten Aufruf.
  * Bei einem Fehler bleibt der jeweilige Eintrag unverändert (nächster Aufruf versucht es erneut).
  */
-function artists_refresh_fans(mysqli $conn, array $artists): array
+function artists_refresh_fans(mysqli $conn, array $artists, float $budget = ARTIST_REFRESH_BUDGET): array
 {
-    $stale = array_slice(array_filter($artists, 'artist_is_stale'), 0, DEEZER_BATCH, true);
+    $stale = array_keys(array_filter($artists, 'artist_is_stale'));
+    usort($stale, fn($a, $b) => strcmp((string)$artists[$a]['updated_at'], (string)$artists[$b]['updated_at']));
 
-    $urls = [];
-    foreach ($stale as $i => $artist) {
-        if (!empty($artist['deezer_id'])) {
-            $urls[$i] = 'https://api.deezer.com/artist/' . (int)$artist['deezer_id'];
+    $start = microtime(true);
+    foreach ($stale as $i) {
+        if (microtime(true) - $start >= $budget) {
+            break;
         }
-    }
-    $responses = api_get_json_multi($urls);
-
-    foreach ($stale as $i => $artist) {
-        $deezer = isset($urls[$i])
-            ? deezer_parse_artist($responses[$i])
-            : deezer_fetch_artist(null, $artist['name']); // ohne ID: Suche (selten)
+        $artist = $artists[$i];
+        $deezer = deezer_fetch_artist($artist['deezer_id'] ? (int)$artist['deezer_id'] : null, $artist['name']);
         if ($deezer !== null) {
             $artists[$i] = artist_save_deezer($conn, $artist, $deezer);
         }
@@ -296,7 +258,7 @@ function artists_refresh_fans(mysqli $conn, array $artists): array
 /** Ein Künstler mit aktuellen Fans/Bild (lädt bei Bedarf neu). */
 function artist_fresh(mysqli $conn, array $artist): array
 {
-    return artists_refresh_fans($conn, [$artist])[0];
+    return artists_refresh_fans($conn, [$artist], PHP_FLOAT_MAX)[0];
 }
 
 /**
@@ -353,7 +315,7 @@ function artist_find(mysqli $conn, int $id): ?array
     return $artist ? artist_refresh_bio($conn, artist_fresh($conn, $artist)) : null;
 }
 
-/** Alle Künstler, alphabetisch; veraltete Fans/Bilder werden gleichzeitig neu geladen. */
+/** Alle Künstler, alphabetisch; veraltete Fans/Bilder werden bis zu 3 s lang neu geladen. */
 function artist_all(mysqli $conn): array
 {
     $artists = $conn->query('SELECT ' . ARTIST_COLUMNS . ' FROM artists ORDER BY name')->fetch_all(MYSQLI_ASSOC);
