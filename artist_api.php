@@ -196,9 +196,9 @@ function wiki_fetch_bio(string $name, ?string $fixedTitle = null): ?array
 
 /* ----------------------------------------------------------------- Cache */
 
-function cache_expired(?string $timestamp): bool
+function cache_expired(?string $timestamp, int $ttl = ARTIST_CACHE_TTL): bool
 {
-    return empty($timestamp) || strtotime($timestamp) < time() - ARTIST_CACHE_TTL;
+    return empty($timestamp) || strtotime($timestamp) < time() - $ttl;
 }
 
 /** Fans/Bild älter als 7 Tage (oder noch nie geladen)? */
@@ -322,6 +322,87 @@ function artist_all(mysqli $conn): array
     return artists_refresh_fans($conn, $artists);
 }
 
+/* ------------------------------------------------------------ Startseite */
+
+const TOP_TRACKS_TTL      = 24 * 3600;   // Top Songs: 1 Tag
+const TOP_TRACKS_PLAYLIST = 3155776842;  // Deezer-Playlist „Top Worldwide“ (unabhängig vom Serverstandort)
+
+/** Liest einen Eintrag aus `api_cache` (db/migrations/005); null, wenn nicht vorhanden. */
+function cache_get(mysqli $conn, string $key): ?array
+{
+    $stmt = $conn->prepare('SELECT payload, updated_at FROM api_cache WHERE cache_key = ?');
+    if (!$stmt) {
+        return null; // Tabelle fehlt (005 nicht eingespielt): ohne Cache weiter
+    }
+    $stmt->bind_param('s', $key);
+    $stmt->execute();
+    $row = $stmt->get_result()->fetch_assoc();
+    $stmt->close();
+
+    $data = $row ? json_decode($row['payload'], true) : null;
+    return is_array($data) ? ['data' => $data, 'updated_at' => $row['updated_at']] : null;
+}
+
+function cache_set(mysqli $conn, string $key, array $data): void
+{
+    $stmt = $conn->prepare(
+        'INSERT INTO api_cache (cache_key, payload, updated_at) VALUES (?, ?, NOW())
+         ON DUPLICATE KEY UPDATE payload = VALUES(payload), updated_at = VALUES(updated_at)'
+    );
+    if (!$stmt) {
+        return;
+    }
+    $payload = json_encode($data, JSON_UNESCAPED_UNICODE);
+    $stmt->bind_param('ss', $key, $payload);
+    $stmt->execute();
+    $stmt->close();
+}
+
+/**
+ * Die 10 ersten Songs der Deezer-Playlist „Top Worldwide“, einmal am Tag neu geladen.
+ * Bei einem Fehler die zuletzt gespeicherte Liste; null, wenn es noch keine gibt.
+ *
+ * @return list<array{title:string, artist:string, link:?string}>|null
+ */
+function top_tracks(mysqli $conn): ?array
+{
+    $cached = cache_get($conn, 'top_tracks');
+    if ($cached && !cache_expired($cached['updated_at'], TOP_TRACKS_TTL)) {
+        return $cached['data'];
+    }
+
+    $response = api_get_json('https://api.deezer.com/playlist/' . TOP_TRACKS_PLAYLIST . '/tracks?limit=10');
+    $tracks = [];
+    foreach ($response['data'] ?? [] as $track) {
+        if (isset($track['title'], $track['artist']['name'])) {
+            $tracks[] = [
+                'title'  => (string)$track['title'],
+                'artist' => (string)$track['artist']['name'],
+                'link'   => https_url_or_null($track['link'] ?? null),
+            ];
+        }
+    }
+
+    if ($tracks) {
+        cache_set($conn, 'top_tracks', $tracks);
+        return $tracks;
+    }
+    return $cached['data'] ?? null;
+}
+
+/** Künstler mit den meisten Deezer-Fans (nur aus dem Cache, ohne API-Abruf). */
+function top_artists(mysqli $conn, int $limit = 10): array
+{
+    $stmt = $conn->prepare(
+        'SELECT ' . ARTIST_COLUMNS . ' FROM artists WHERE fans IS NOT NULL ORDER BY fans DESC LIMIT ?'
+    );
+    $stmt->bind_param('i', $limit);
+    $stmt->execute();
+    $artists = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+    $stmt->close();
+    return $artists;
+}
+
 /* ---------------------------------------------------------------- Ausgabe */
 
 /** Lokales Bild: image_path aus der DB, sonst Suche in image/, sonst Platzhalter. */
@@ -333,22 +414,44 @@ function artist_local_image(array $artist): string
     return find_artist_image($artist['name']);
 }
 
-/** Bild für die Anzeige: Deezer-Bild, ansonsten lokales Bild. */
-function artist_image(array $artist): string
+/**
+ * Bild für die Anzeige: Deezer-Bild, ansonsten lokales Bild.
+ * Deezer liefert dasselbe Bild in mehreren Größen (…/1000x1000-…, …/500x500-…, …/250x250-…);
+ * für kleine Darstellungen reicht 500 (ca. 23 KB statt 120 KB).
+ */
+function artist_image(array $artist, int $size = 1000): string
 {
-    return $artist['image_url'] ?: artist_local_image($artist);
+    if (empty($artist['image_url'])) {
+        return artist_local_image($artist);
+    }
+    return $size === 1000
+        ? $artist['image_url']
+        : str_replace('/1000x1000-', "/{$size}x{$size}-", $artist['image_url']);
 }
 
 /**
  * <img>-Tag mit Fallback: Lädt das Deezer-Bild im Browser nicht, wird das lokale Bild gezeigt.
  */
-function artist_img_tag(array $artist, string $attrs = ''): string
+function artist_img_tag(array $artist, string $attrs = '', int $size = 1000): string
 {
     $local = artist_local_image($artist);
-    return '<img src="' . e(artist_image($artist)) . '" alt="' . e($artist['name']) . '"'
+    return '<img src="' . e(artist_image($artist, $size)) . '" alt="' . e($artist['name']) . '"'
          . ' data-fallback="' . e($local) . '"'
          . ' onerror="this.onerror=null;this.src=this.dataset.fallback"'
          . ($attrs !== '' ? ' ' . $attrs : '') . '>';
+}
+
+/** Kurzform für Listen: „24,1 Mio.“, „547 Tsd.“ */
+function format_fans_short($fans): string
+{
+    $fans = (int)$fans;
+    if ($fans >= 1_000_000) {
+        return number_format($fans / 1_000_000, 1, ',', '.') . ' Mio.';
+    }
+    if ($fans >= 1_000) {
+        return number_format($fans / 1_000, 0, ',', '.') . ' Tsd.';
+    }
+    return (string)$fans;
 }
 
 /** Fan-Zahl im deutschen Format, „–“ wenn noch nicht geladen. */

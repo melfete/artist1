@@ -38,14 +38,15 @@ Das Spiel ist online über **InfinityFree** erreichbar:
 1. Projekt nach `C:\xampp\htdocs\artist1` klonen und in XAMPP **Apache** und **MySQL** starten.
 2. In phpMyAdmin eine Datenbank `projektm` anlegen und `projektm.sql` sowie `higher_lower.sql` importieren.
 3. Die Migrationen aus `db/migrations/` der Reihe nach importieren:
-   `001_normalize_artists.sql`, `002_cleanup.sql`, `003_external_api.sql`, danach `004_bio_updated_at.sql`.
+   `001_normalize_artists.sql`, `002_cleanup.sql`, `003_external_api.sql`, `004_bio_updated_at.sql`, danach `005_api_cache.sql`.
 4. `config.example.php` nach `config.php` kopieren und die Zugangsdaten eintragen.
    `config.php` wird **nicht** ins Repository übernommen.
 5. Im Browser `http://localhost/artist1/` öffnen.
 
 ## 📚 Datenquellen
 
-* **[Deezer API](https://developers.deezer.com/api):** Künstlerbilder (`picture_xl`) und Fan-Zahlen (`nb_fan`).
+* **[Deezer API](https://developers.deezer.com/api):** Künstlerbilder (`picture_xl`) und Fan-Zahlen (`nb_fan`);
+  auf der Startseite die Top Songs aus der Playlist „Top Worldwide“ (täglich aktualisiert) und die Top Künstler nach Fans.
 * **[Wikipedia REST API](https://de.wikipedia.org/api/rest_v1/):** Kurzbeschreibungen der Künstler, zuerst aus der deutschen, sonst aus der englischen Wikipedia.
   Die Texte stehen unter der Lizenz [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/deed.de); jede Detailseite verlinkt den Quellartikel.
 

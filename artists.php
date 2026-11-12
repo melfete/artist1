@@ -118,7 +118,7 @@ $conn->close();
         <?php foreach ($artists as $artist): ?>
             <a class="artist-card" href="artist.php?id=<?= (int)$artist['id'] ?>">
                 <div class="image-container">
-                    <?= artist_img_tag($artist, 'loading="lazy"') ?>
+                    <?= artist_img_tag($artist, 'loading="lazy"', 500) ?>
                 </div>
                 <div class="artist-name"><?= e($artist['name']) ?></div>
                 <div class="artist-fans"><?= e(format_fans($artist['fans'])) ?> Fans</div>

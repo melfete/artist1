@@ -1,12 +1,21 @@
 <?php
 require_once 'security.php';
-require_once 'helpers.php';
+require_once 'artist_api.php';
 include 'db_connect.php';
 
-$carouselArtists = [
-    "reezy", "Kendrick Lamar", "Michael Jackson", "RIN", "Jazeek", 
-    "Nimo", "Luciano", "Xatar", "Jamal", "Sabrina Carpenter", "Billie Eilish", "Bad Bunny"
-];
+// Top Künstler und Karussell: Künstler mit den meisten Deezer-Fans (aus dem Cache, kein API-Abruf).
+// Top Songs: Deezer-Playlist „Top Worldwide“, einmal am Tag neu geladen.
+// Solange noch keine API-Daten vorliegen, greifen die bisherigen festen Listen.
+$topArtists = top_artists($conn, 12);
+$topTracks  = top_tracks($conn);
+
+$carouselArtists = $topArtists;
+if (!$carouselArtists) {
+    foreach (["reezy", "Kendrick Lamar", "Michael Jackson", "RIN", "Jazeek", "Nimo",
+              "Luciano", "Xatar", "Jamal", "Sabrina Carpenter", "Billie Eilish", "Bad Bunny"] as $name) {
+        $carouselArtists[] = ['name' => $name, 'image_url' => null, 'image_path' => null];
+    }
+}
 ?>
 
 <!DOCTYPE html>
@@ -139,6 +148,9 @@ $carouselArtists = [
         .rank { color: var(--spotify-green); font-weight: bold; margin-right: 10px; }
         .name { flex-grow: 1; }
         .detail { color: var(--text-dim); font-size: 0.9rem; }
+        .name a { color: inherit; text-decoration: none; }
+        .name a:hover { text-decoration: underline; }
+        .source { margin: 12px 0 0; color: #666; font-size: 0.75rem; }
 
         #faq {
             max-width: 800px;
@@ -196,10 +208,10 @@ $carouselArtists = [
 <div class="carousel">
     <div class="image-track">
         <?php
+        // Zweimal hintereinander, damit die Endlos-Animation (translateX -50 %) nahtlos läuft
         for ($i = 0; $i < 2; $i++) {
             foreach ($carouselArtists as $artist) {
-                $path = find_artist_image($artist);
-                echo '<img src="' . e($path) . '" alt="' . e($artist) . '">';
+                echo artist_img_tag($artist, '', 500);
             }
         }
         ?>
@@ -209,15 +221,32 @@ $carouselArtists = [
 <div id="news">
     <div class="news-column">
         <h2>Top Songs</h2>
-        <?php
-        $sql = "SELECT place, name, artist FROM topsongs ORDER BY place ASC LIMIT 10";
-        $result = $conn->query($sql);
-        if ($result && $result->num_rows > 0) {
-            while($row = $result->fetch_assoc()) {
-                echo "<div class='news-item'><span class='rank'>#" . (int)$row['place'] . "</span> <span class='name'>" . htmlspecialchars($row['name']) . "</span> <span class='detail'>" . htmlspecialchars($row['artist']) . "</span></div>";
+        <?php if ($topTracks): ?>
+            <?php foreach ($topTracks as $i => $track): ?>
+                <div class="news-item">
+                    <span class="rank">#<?= $i + 1 ?></span>
+                    <span class="name">
+                        <?php if ($track['link']): ?>
+                            <a href="<?= e($track['link']) ?>" target="_blank" rel="noopener"><?= e($track['title']) ?></a>
+                        <?php else: ?>
+                            <?= e($track['title']) ?>
+                        <?php endif; ?>
+                    </span>
+                    <span class="detail"><?= e($track['artist']) ?></span>
+                </div>
+            <?php endforeach; ?>
+            <p class="source">Deezer-Playlist „Top Worldwide“, täglich aktualisiert</p>
+        <?php else: ?>
+            <?php
+            $sql = "SELECT place, name, artist FROM topsongs ORDER BY place ASC LIMIT 10";
+            $result = $conn->query($sql);
+            if ($result && $result->num_rows > 0) {
+                while($row = $result->fetch_assoc()) {
+                    echo "<div class='news-item'><span class='rank'>#" . (int)$row['place'] . "</span> <span class='name'>" . htmlspecialchars($row['name']) . "</span> <span class='detail'>" . htmlspecialchars($row['artist']) . "</span></div>";
+                }
             }
-        }
-        ?>
+            ?>
+        <?php endif; ?>
     </div>
 
     <div class="news-column">
@@ -235,15 +264,26 @@ $carouselArtists = [
 
     <div class="news-column">
         <h2>Top Künstler</h2>
-        <?php
-        $sql = "SELECT place, name, streams FROM topartist ORDER BY place ASC LIMIT 10";
-        $result = $conn->query($sql);
-        if ($result && $result->num_rows > 0) {
-            while($row = $result->fetch_assoc()) {
-                echo "<div class='news-item'><span class='rank'>#" . (int)$row['place'] . "</span> <span class='name'>" . htmlspecialchars($row['name']) . "</span> <span class='detail'>" . htmlspecialchars($row['streams']) . " Mio.</span></div>";
+        <?php if ($topArtists): ?>
+            <?php foreach (array_slice($topArtists, 0, 10) as $i => $artist): ?>
+                <div class="news-item">
+                    <span class="rank">#<?= $i + 1 ?></span>
+                    <span class="name"><a href="artist.php?id=<?= (int)$artist['id'] ?>"><?= e($artist['name']) ?></a></span>
+                    <span class="detail"><?= e(format_fans_short($artist['fans'])) ?> Fans</span>
+                </div>
+            <?php endforeach; ?>
+            <p class="source">Nach Deezer-Fans, aus den Künstlern im Spiel</p>
+        <?php else: ?>
+            <?php
+            $sql = "SELECT place, name, streams FROM topartist ORDER BY place ASC LIMIT 10";
+            $result = $conn->query($sql);
+            if ($result && $result->num_rows > 0) {
+                while($row = $result->fetch_assoc()) {
+                    echo "<div class='news-item'><span class='rank'>#" . (int)$row['place'] . "</span> <span class='name'>" . htmlspecialchars($row['name']) . "</span> <span class='detail'>" . htmlspecialchars($row['streams']) . " Mio.</span></div>";
+                }
             }
-        }
-        ?>
+            ?>
+        <?php endif; ?>
     </div>
 </div>
 
