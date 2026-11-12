@@ -306,7 +306,7 @@ $isGameOver = isset($_SESSION["game_over"]) && $_SESSION["game_over"] === true;
         <div>
             <p style="color: #b3b3b3; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 1px;">Künstler 1</p>
             <div class="image-wrapper">
-                <?= artist_img_tag($artist1) ?>
+                <?= artist_img_tag($artist1, '', 500) ?>
             </div>
             <div class="artist-name"><?= e($artist1["name"]) ?></div>
         </div>
@@ -319,7 +319,7 @@ $isGameOver = isset($_SESSION["game_over"]) && $_SESSION["game_over"] === true;
         <div>
             <p style="color: #b3b3b3; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 1px;">Künstler 2</p>
             <div class="image-wrapper">
-                <?= artist_img_tag($artist2) ?>
+                <?= artist_img_tag($artist2, '', 500) ?>
             </div>
             <div class="artist-name"><?= e($artist2["name"]) ?></div>
         </div>
