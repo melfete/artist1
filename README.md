@@ -23,7 +23,7 @@ Ein Web-Spiel über Musik-Künstler: Du rätst, welcher von zwei Künstlern mehr
 * Die Künstler-Übersicht zeigt jeden Künstler mit Bild und Fan-Zahl. Jede Karte führt zur Detailseite (`artist.php?id=N`) mit einer Kurzbeschreibung.
 * Ein Klick auf einen der Top Songs der Startseite öffnet unten eine Player-Leiste mit der 30-Sekunden-Vorschau von Deezer. Der Player kann vor- und zurückspringen, spulen und die Lautstärke regeln, spielt danach automatisch den nächsten Song und reagiert auf die Leertaste.
 * Die Startseite zeigt die Top Songs aus den weltweiten Deezer-Charts und die Künstler mit den meisten Fans. Künstler in der Liste und im Karussell führen zur Detailseite.
-* Dunkles Design im Stil von Spotify, das auch auf Smartphone und Tablet funktioniert.
+* Dunkles Design, das auch auf Smartphone und Tablet funktioniert.
 
 ## Technik
 
@@ -61,4 +61,4 @@ Das Projekt ist im Februar 2025 als Gruppenprojekt in der Ausbildung entstanden:
 
 Danach hat Saltuk Kalender das Projekt weitergeführt und fast alles neu geschrieben: Datenbank, Spiellogik, Startseite, Künstlerseiten, die Anbindung an Deezer und Wikipedia sowie das Design. Vom ursprünglichen Code ist kaum noch etwas übrig. Den kompletten Stand von damals zeigt der Tag [`gruppenversion-2025`](https://github.com/melfete/artist1/tree/gruppenversion-2025).
 
-*Fan-Projekt zu Lernzwecken, ohne Verbindung zu Spotify, Deezer oder Wikipedia.*
+*Fan-Projekt zu Lernzwecken, ohne Verbindung zu Deezer oder Wikipedia.*
