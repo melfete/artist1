@@ -3,8 +3,8 @@ require_once 'security.php';
 require_once 'artist_api.php';
 include 'db_connect.php';
 
-// Alle Künstler aus `artists`; pro Aufruf werden höchstens 2 veraltete Einträge
-// bei Deezer/Wikipedia neu geladen, der Rest kommt aus dem Cache.
+// Alle Künstler aus `artists`; veraltete Fans/Bilder werden gleichzeitig bei Deezer
+// neu geladen, der Rest kommt aus dem Cache. Wikipedia wird nur auf der Detailseite abgefragt.
 $artists = artist_all($conn);
 $conn->close();
 ?>
