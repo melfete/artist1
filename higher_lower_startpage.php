@@ -137,11 +137,11 @@ start_secure_session();
         </div>
 
         <h1>THE <span class="highlight">HIGHER</span> <br> <span class="highlight lower">LOWER</span> GAME</h1>
-        <div class="sub-headline">Spotify Edition</div>
+        <div class="sub-headline">Fan Edition</div>
 
         <div class="description">
-            <p>Welcher Künstler hat mehr monatliche Hörer?</p>
-            <p style="font-size: 0.9rem;">Basierend auf den aktuellen Global Spotify Streaming-Daten.</p>
+            <p>Welcher Künstler hat mehr Fans?</p>
+            <p style="font-size: 0.9rem;">Basierend auf den aktuellen Fan-Zahlen von Deezer.</p>
         </div>
 
         <div class="button-group">
