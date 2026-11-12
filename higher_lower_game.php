@@ -1,9 +1,51 @@
 <?php
 require_once 'security.php';
-require_once 'helpers.php';
+require_once 'artist_api.php';
 start_secure_session();
 
 include 'db_connect.php';
+
+/**
+ * Zieht einen zufälligen Künstler (außer $excludeIds) und lädt seine Fan-Zahl, falls veraltet.
+ * Künstler ohne Fan-Zahl (Deezer bisher nie erreichbar) werden übersprungen.
+ * Rückgabe enthält nur, was das Spiel braucht – landet so in der Session.
+ */
+function draw_game_artist(mysqli $conn, array $excludeIds): ?array
+{
+    for ($try = 0; $try < 5; $try++) {
+        $ids = array_values(array_map('intval', $excludeIds)) ?: [0];
+        $placeholders = implode(',', array_fill(0, count($ids), '?'));
+        $stmt = $conn->prepare(
+            'SELECT ' . ARTIST_COLUMNS . " FROM artists WHERE id NOT IN ($placeholders) ORDER BY RAND() LIMIT 1"
+        );
+        $stmt->bind_param(str_repeat('i', count($ids)), ...$ids);
+        $stmt->execute();
+        $row = $stmt->get_result()->fetch_assoc();
+        $stmt->close();
+
+        if (!$row) {
+            return null;
+        }
+        $row = artist_fresh($conn, $row);
+        if ($row['fans'] !== null) {
+            return [
+                'id'         => (int)$row['id'],
+                'name'       => $row['name'],
+                'fans'       => (int)$row['fans'],
+                'image_url'  => $row['image_url'],
+                'image_path' => artist_local_image($row),
+            ];
+        }
+        $excludeIds[] = (int)$row['id'];
+    }
+    return null;
+}
+
+// Laufendes Spiel aus der Zeit vor der Umstellung auf Fans (alte Session-Struktur): neu starten
+if (isset($_SESSION['current_artist']) && !isset($_SESSION['current_artist']['fans'])) {
+    unset($_SESSION['current_artist'], $_SESSION['next_artist'], $_SESSION['game_over'], $_SESSION['score_saved']);
+    $_SESSION['score'] = 0;
+}
 
 if (isset($_GET['action']) && $_GET['action'] === 'reset') {
     if (!csrf_valid($_GET['token'] ?? null)) {
@@ -26,40 +68,30 @@ if (!isset($_SESSION["score"])) {
 
 
 if (!isset($_SESSION["current_artist"])) {
-    // Neues Spiel: zwei verschiedene Künstler ziehen
-    $result = $conn->query("SELECT * FROM `künstler` ORDER BY RAND() LIMIT 2");
-
-    if ($result && $result->num_rows >= 2) {
-        $artists = $result->fetch_all(MYSQLI_ASSOC);
-        $_SESSION["current_artist"] = $artists[0];
-        $_SESSION["next_artist"] = $artists[1];
-    } else {
+    // Neues Spiel: ersten Künstler ziehen (der Gegner folgt unten)
+    $first = draw_game_artist($conn, []);
+    if (!$first) {
         die("Fehler: Datenbank unvollständig.");
     }
+    $_SESSION["current_artist"] = $first;
+    unset($_SESSION["next_artist"]);
 }
 
-if (!isset($_SESSION["next_artist"])
-    || $_SESSION["current_artist"]["künstler_name"] === $_SESSION["next_artist"]["künstler_name"]) {
+if (!isset($_SESSION["next_artist"])) {
     // Nach richtiger Antwort: aktuellen Künstler behalten, nur einen neuen Gegner ziehen
-    $stmt = $conn->prepare("SELECT * FROM `künstler` WHERE künstler_name <> ? ORDER BY RAND() LIMIT 1");
-    $stmt->bind_param("s", $_SESSION["current_artist"]["künstler_name"]);
-    $stmt->execute();
-    $row = $stmt->get_result()->fetch_assoc();
-    $stmt->close();
-
-    if (!$row) {
+    $next = draw_game_artist($conn, [$_SESSION["current_artist"]["id"]]);
+    if (!$next) {
         die("Fehler: Kein neuer Künstler gefunden.");
     }
-    $_SESSION["next_artist"] = $row;
+    $_SESSION["next_artist"] = $next;
 }
+$conn->close();
 
 $artist1 = $_SESSION["current_artist"];
 $artist2 = $_SESSION["next_artist"];
 
-$image1 = find_artist_image($artist1["künstler_name"]);
-$image2 = find_artist_image($artist2["künstler_name"]);
-
-$streams1 = isset($artist1["künstler_streams"]) ? (int)$artist1["künstler_streams"] : 0;
+// Nur die Fans von Künstler 1 werden angezeigt; die von Künstler 2 bleiben in der Session.
+$fans1 = (int)$artist1["fans"];
 
 $isGameOver = isset($_SESSION["game_over"]) && $_SESSION["game_over"] === true;
 ?>
@@ -274,11 +306,11 @@ $isGameOver = isset($_SESSION["game_over"]) && $_SESSION["game_over"] === true;
         <div>
             <p style="color: #b3b3b3; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 1px;">Künstler 1</p>
             <div class="image-wrapper">
-                <img src="<?= e($image1) ?>" alt="<?= htmlspecialchars($artist1["künstler_name"]) ?>">
+                <?= artist_img_tag($artist1) ?>
             </div>
-            <div class="artist-name"><?= htmlspecialchars($artist1["künstler_name"]) ?></div>
+            <div class="artist-name"><?= e($artist1["name"]) ?></div>
         </div>
-        <div class="streams"><?= number_format($streams1, 0, ',', '.') ?> <span style="font-size: 1rem; color: #b3b3b3;">Streams</span></div>
+        <div class="streams"><?= e(format_fans($fans1)) ?> <span style="font-size: 1rem; color: #b3b3b3;">Fans</span></div>
     </div>
 
     <div class="vs-circle">VS</div>
@@ -287,12 +319,12 @@ $isGameOver = isset($_SESSION["game_over"]) && $_SESSION["game_over"] === true;
         <div>
             <p style="color: #b3b3b3; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 1px;">Künstler 2</p>
             <div class="image-wrapper">
-                <img src="<?= e($image2) ?>" alt="<?= htmlspecialchars($artist2["künstler_name"]) ?>">
+                <?= artist_img_tag($artist2) ?>
             </div>
-            <div class="artist-name"><?= htmlspecialchars($artist2["künstler_name"]) ?></div>
+            <div class="artist-name"><?= e($artist2["name"]) ?></div>
         </div>
         <div class="streams" style="color: #444;">? ? ?</div>
-        <p style="margin: 0; color: #b3b3b3;">Mehr oder weniger Streams?</p>
+        <p style="margin: 0; color: #b3b3b3;">Mehr oder weniger Fans?</p>
     </div>
 </div>
 

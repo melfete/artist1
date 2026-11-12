@@ -115,3 +115,83 @@ h1 {
     }
 }
 
+
+/* Detailseite mit Deezer-/Wikipedia-Daten */
+.artist-container {
+    gap: 30px;
+    align-items: flex-start;
+}
+
+.artist-text h1 {
+    text-align: left;
+    font-size: 2.5rem;
+    margin: 0 0 10px;
+}
+
+.artist-image img {
+    width: 260px;
+    height: 260px;
+}
+
+.fans {
+    font-size: 1.2rem;
+    color: #ccc;
+}
+
+.fans-number {
+    font-size: 2rem;
+    font-weight: 800;
+    color: #f39c12;
+}
+
+.artist-text .bio {
+    line-height: 1.6;
+    font-weight: 400;
+    color: #e6e6e6;
+}
+
+.artist-text .source {
+    font-size: 0.85rem;
+    color: #999;
+}
+
+.source a {
+    color: #f39c12;
+}
+
+.albums {
+    margin: 0 0 10px;
+    padding-left: 20px;
+}
+
+.albums li {
+    margin: 4px 0;
+}
+
+.not-found {
+    color: white;
+    font-size: 1.3rem;
+}
+
+body > form {
+    margin: 20px 0 40px;
+}
+
+@media (max-width: 768px) {
+    .artist-container {
+        width: auto;
+        margin: 15px 16px;
+        align-items: stretch;
+    }
+
+    .artist-text h1 {
+        font-size: 2rem;
+    }
+
+    .artist-image img {
+        width: 100%;
+        max-width: 260px;
+        height: auto;
+        aspect-ratio: 1 / 1;
+    }
+}

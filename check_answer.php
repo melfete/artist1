@@ -19,12 +19,12 @@ if ($guess !== 'higher' && $guess !== 'lower') {
     exit();
 }
 
-// Streams ausschließlich aus der Session – nie vom Client übernehmen
-$streams1 = (int)$_SESSION['current_artist']['künstler_streams'];
-$streams2 = (int)$_SESSION['next_artist']['künstler_streams'];
+// Fan-Zahlen (Deezer) ausschließlich aus der Session – nie vom Client übernehmen
+$fans1 = (int)($_SESSION['current_artist']['fans'] ?? 0);
+$fans2 = (int)($_SESSION['next_artist']['fans'] ?? 0);
 
-$correct = ($guess === 'higher' && $streams2 >= $streams1)
-        || ($guess === 'lower'  && $streams2 <= $streams1);
+$correct = ($guess === 'higher' && $fans2 >= $fans1)
+        || ($guess === 'lower'  && $fans2 <= $fans1);
 
 if (!isset($_SESSION['score'])) {
     $_SESSION['score'] = 0;

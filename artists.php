@@ -1,47 +1,12 @@
 <?php
 require_once 'security.php';
-require_once 'helpers.php';
+require_once 'artist_api.php';
 include 'db_connect.php';
 
-$sql = "SELECT künstler_name FROM `künstler` ORDER BY künstler_name ASC";
-$result = $conn->query($sql);
-
-$uniqueArtists = [];
-
-if ($result && $result->num_rows > 0) {
-    while($row = $result->fetch_assoc()) {
-        $originalName = trim($row['künstler_name']);
-        if (empty($originalName)) continue;
-
-        $comparisonKey = strtolower(preg_replace('/[^a-zA-Z0-9]/', '', $originalName));
-        
-        $currentImagePath = find_artist_image($originalName, null);
-        $foundMatchKey = null;
-
-        if (isset($uniqueArtists[$comparisonKey])) {
-            $foundMatchKey = $comparisonKey;
-        } else {
-            foreach ($uniqueArtists as $key => $data) {
-                if (levenshtein($comparisonKey, $key) < 3) {
-                    $foundMatchKey = $key;
-                    break;
-                }
-            }
-        }
-
-        if ($foundMatchKey === null) {
-            $uniqueArtists[$comparisonKey] = [
-                'name' => $originalName,
-                'image' => $currentImagePath ?? DEFAULT_ARTIST_IMAGE
-            ];
-        } else {
-            if ($uniqueArtists[$foundMatchKey]['image'] === DEFAULT_ARTIST_IMAGE && $currentImagePath !== null) {
-                $uniqueArtists[$foundMatchKey]['image'] = $currentImagePath;
-                $uniqueArtists[$foundMatchKey]['name'] = $originalName;
-            }
-        }
-    }
-}
+// Alle Künstler aus `artists`; pro Aufruf werden höchstens 2 veraltete Einträge
+// bei Deezer/Wikipedia neu geladen, der Rest kommt aus dem Cache.
+$artists = artist_all($conn);
+$conn->close();
 ?>
 
 <!DOCTYPE html>
@@ -72,11 +37,32 @@ if ($result && $result->num_rows > 0) {
             margin: 0 auto;
         }
         .artist-card {
+            display: block;
             background: #181818;
             padding: 15px;
             border-radius: 10px;
             text-align: center;
             transition: all 0.3s ease;
+            color: inherit;
+            text-decoration: none;
+        }
+        .artist-card:focus-visible {
+            outline: 2px solid #1db954;
+            outline-offset: 2px;
+        }
+        .artist-fans {
+            margin-top: 4px;
+            font-size: 0.85rem;
+            color: #b3b3b3;
+        }
+        .data-source {
+            text-align: center;
+            margin-top: 30px;
+            font-size: 0.8rem;
+            color: #777;
+        }
+        .data-source a {
+            color: #999;
         }
         .artist-card:hover {
             background: #282828;
@@ -128,23 +114,25 @@ if ($result && $result->num_rows > 0) {
 <h1>Künstler Mediathek</h1>
 
 <div class="artist-grid">
-    <?php
-    if (!empty($uniqueArtists)) {
-        foreach ($uniqueArtists as $artistData) {
-            ?>
-            <div class="artist-card">
+    <?php if ($artists): ?>
+        <?php foreach ($artists as $artist): ?>
+            <a class="artist-card" href="artist.php?id=<?= (int)$artist['id'] ?>">
                 <div class="image-container">
-                    <img src="<?= e($artistData['image']) ?>" alt="<?= e($artistData['name']) ?>">
+                    <?= artist_img_tag($artist, 'loading="lazy"') ?>
                 </div>
-                <div class="artist-name"><?= e($artistData['name']) ?></div>
-            </div>
-            <?php
-        }
-    } else {
-        echo "<p style='text-align:center;'>Keine Künstler gefunden.</p>";
-    }
-    ?>
+                <div class="artist-name"><?= e($artist['name']) ?></div>
+                <div class="artist-fans"><?= e(format_fans($artist['fans'])) ?> Fans</div>
+            </a>
+        <?php endforeach; ?>
+    <?php else: ?>
+        <p style="text-align:center;">Keine Künstler gefunden.</p>
+    <?php endif; ?>
 </div>
+
+<p class="data-source">
+    Fans und Bilder: <a href="https://www.deezer.com" target="_blank" rel="noopener">Deezer</a> ·
+    Beschreibungen: Wikipedia (<a href="https://creativecommons.org/licenses/by-sa/4.0/deed.de" target="_blank" rel="noopener">CC BY-SA 4.0</a>)
+</p>
 
 <a href="index.php" class="back-btn">Zurück zum Dashboard</a>
 
