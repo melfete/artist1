@@ -13,7 +13,7 @@ $carouselArtists = $topArtists;
 if (!$carouselArtists) {
     foreach (["reezy", "Kendrick Lamar", "Michael Jackson", "RIN", "Jazeek", "Nimo",
               "Luciano", "Xatar", "Jamal", "Sabrina Carpenter", "Billie Eilish", "Bad Bunny"] as $name) {
-        $carouselArtists[] = ['name' => $name, 'image_url' => null, 'image_path' => null];
+        $carouselArtists[] = ['id' => null, 'name' => $name, 'image_url' => null, 'image_path' => null];
     }
 }
 ?>
@@ -24,6 +24,8 @@ if (!$carouselArtists) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Spotify Artist Website</title>
+    <?php // ?v=Änderungszeit: nach einem Update laden Browser/Server-Cache die neue Datei sofort ?>
+    <link rel="stylesheet" href="player.css?v=<?= (int)@filemtime(__DIR__ . '/player.css') ?>">
     <style>
         :root {
             --spotify-green: #1db954;
@@ -72,7 +74,6 @@ if (!$carouselArtists) {
 
         .game-button { background-color: var(--spotify-green); color: white; }
         .artist-button { background-color: #333; color: white; }
-        .music-button { background-color: #333; color: white; }
 
         .nav-button:hover {
             transform: scale(1.05);
@@ -102,7 +103,13 @@ if (!$carouselArtists) {
             border-radius: 10px;
             box-shadow: 0 8px 15px rgba(0,0,0,0.5);
             flex-shrink: 0;
+            display: block;
+            transition: transform 0.25s;
         }
+
+        .image-track a { flex-shrink: 0; }
+        .image-track a:hover img { transform: scale(1.05); }
+        .carousel:hover .image-track { animation-play-state: paused; }
 
         @keyframes scroll {
             0% { transform: translateX(0); }
@@ -151,6 +158,53 @@ if (!$carouselArtists) {
         .name a { color: inherit; text-decoration: none; }
         .name a:hover { text-decoration: underline; }
         .source { margin: 12px 0 0; color: #666; font-size: 0.75rem; }
+
+        /* Ganze Zeile klickbar: Songs (Player) und Künstler (Detailseite) */
+        .news-item.is-clickable {
+            width: 100%;
+            align-items: center;
+            gap: 10px;
+            margin: 0 -10px;
+            padding: 8px 10px;
+            box-sizing: content-box;
+            background: none;
+            border: none;
+            border-bottom: 1px solid #222;
+            border-radius: 6px;
+            color: inherit;
+            font: inherit;
+            text-align: left;
+            text-decoration: none;
+            cursor: pointer;
+            transition: background 0.15s;
+        }
+        .news-item.is-clickable:hover { background: rgba(255,255,255,0.07); }
+        .news-item.is-clickable:focus-visible { outline: 2px solid var(--spotify-green); outline-offset: -2px; }
+        .news-item.is-clickable .rank { margin-right: 0; min-width: 2.2em; }
+
+        /* Songs: Platz → Play-Symbol beim Hovern, grün beim laufenden Song */
+        .song-cover {
+            width: 40px;
+            height: 40px;
+            border-radius: 4px;
+            object-fit: cover;
+            flex-shrink: 0;
+            background: #333;
+        }
+        .song-text { flex-grow: 1; min-width: 0; display: flex; flex-direction: column; }
+        .song-text .name,
+        .song-text .detail { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .song-play { display: none; color: #fff; }
+        .song-play svg { width: 14px; height: 14px; fill: currentColor; vertical-align: -2px; }
+        .song-play .icon-pause,
+        .song.is-playing .song-play .icon-play { display: none; }
+        .song.is-playing .song-play .icon-pause { display: inline; }
+        .song:hover .rank-num,
+        .song.is-current .rank-num { display: none; }
+        .song:hover .song-play,
+        .song.is-current .song-play { display: inline; }
+        .song.is-current .name,
+        .song.is-current .song-play { color: var(--spotify-green); }
 
         #faq {
             max-width: 800px;
@@ -202,16 +256,22 @@ if (!$carouselArtists) {
 <div class="button-container">
     <a href="higher_lower_startpage.php" class="nav-button game-button">Higher Lower Game</a>
     <a href="artists.php" class="nav-button artist-button">Künstler Entdecken</a>
-    <a href="music_player.php" class="nav-button music-button">Music Player</a>
 </div>
 
 <div class="carousel">
     <div class="image-track">
         <?php
-        // Zweimal hintereinander, damit die Endlos-Animation (translateX -50 %) nahtlos läuft
+        // Zweimal hintereinander, damit die Endlos-Animation (translateX -50 %) nahtlos läuft.
+        // Die Kopie ist für Screenreader/Tastatur ausgeblendet, damit jeder Künstler nur einmal vorkommt.
         for ($i = 0; $i < 2; $i++) {
             foreach ($carouselArtists as $artist) {
-                echo artist_img_tag($artist, '', 500);
+                $img = artist_img_tag($artist, '', 500);
+                if (!empty($artist['id'])) {
+                    $copy = $i === 1 ? ' tabindex="-1" aria-hidden="true"' : '';
+                    echo '<a href="artist.php?id=' . (int)$artist['id'] . '" title="' . e($artist['name']) . '"' . $copy . '>' . $img . '</a>';
+                } else {
+                    echo $img;
+                }
             }
         }
         ?>
@@ -223,19 +283,24 @@ if (!$carouselArtists) {
         <h2>Top Songs</h2>
         <?php if ($topTracks): ?>
             <?php foreach ($topTracks as $i => $track): ?>
-                <div class="news-item">
-                    <span class="rank">#<?= $i + 1 ?></span>
-                    <span class="name">
-                        <?php if ($track['link']): ?>
-                            <a href="<?= e($track['link']) ?>" target="_blank" rel="noopener"><?= e($track['title']) ?></a>
-                        <?php else: ?>
-                            <?= e($track['title']) ?>
-                        <?php endif; ?>
+                <button type="button" class="news-item is-clickable song"
+                        data-track-id="<?= (int)$track['id'] ?>"
+                        data-title="<?= e($track['title']) ?>"
+                        data-artist="<?= e($track['artist']) ?>"
+                        data-cover="<?= e($track['cover'] ?? '') ?>"
+                        data-link="<?= e($track['link'] ?? '') ?>"
+                        aria-label="<?= e($track['title'] . ' von ' . $track['artist'] . ' abspielen') ?>">
+                    <span class="rank"><span class="rank-num">#<?= $i + 1 ?></span><span class="song-play" aria-hidden="true"><svg class="icon-play" viewBox="0 0 24 24"><path d="M7 4v16l13-8z"/></svg><svg class="icon-pause" viewBox="0 0 24 24"><path d="M6 4h4v16H6zM14 4h4v16h-4z"/></svg></span></span>
+                    <?php if (!empty($track['cover'])): ?>
+                        <img class="song-cover" src="<?= e($track['cover']) ?>" alt="" loading="lazy">
+                    <?php endif; ?>
+                    <span class="song-text">
+                        <span class="name"><?= e($track['title']) ?></span>
+                        <span class="detail"><?= e($track['artist']) ?></span>
                     </span>
-                    <span class="detail"><?= e($track['artist']) ?></span>
-                </div>
+                </button>
             <?php endforeach; ?>
-            <p class="source">Deezer-Playlist „Top Worldwide“, täglich aktualisiert</p>
+            <p class="source">Deezer-Playlist „Top Worldwide“, täglich aktualisiert · Klick spielt eine 30-Sekunden-Vorschau</p>
         <?php else: ?>
             <?php
             $sql = "SELECT place, name, artist FROM topsongs ORDER BY place ASC LIMIT 10";
@@ -266,11 +331,11 @@ if (!$carouselArtists) {
         <h2>Top Künstler</h2>
         <?php if ($topArtists): ?>
             <?php foreach (array_slice($topArtists, 0, 10) as $i => $artist): ?>
-                <div class="news-item">
+                <a class="news-item is-clickable" href="artist.php?id=<?= (int)$artist['id'] ?>">
                     <span class="rank">#<?= $i + 1 ?></span>
-                    <span class="name"><a href="artist.php?id=<?= (int)$artist['id'] ?>"><?= e($artist['name']) ?></a></span>
+                    <span class="name"><?= e($artist['name']) ?></span>
                     <span class="detail"><?= e(format_fans_short($artist['fans'])) ?> Fans</span>
-                </div>
+                </a>
             <?php endforeach; ?>
             <p class="source">Nach Deezer-Fans, aus den Künstlern im Spiel</p>
         <?php else: ?>
@@ -292,7 +357,7 @@ if (!$carouselArtists) {
     <div class="faq-item">
         <button class="faq-question">Wer hat an diesem Projekt gearbeitet? <span>+</span></button>
         <div class="faq-answer">
-            <p><strong>Saltuk Kalender</strong>: Music Player sowie spätere Überarbeitung und Verbesserungen</p>
+            <p><strong>Saltuk Kalender</strong>: Song-Player sowie spätere Überarbeitung und Verbesserungen</p>
             <p><strong>Chris</strong>: Higher Lower Game</p>
             <p><strong>Yuki</strong>: Startseite</p>
         </div>
@@ -318,6 +383,7 @@ document.querySelectorAll('.faq-question').forEach(item => {
     });
 });
 </script>
+<script src="player.js?v=<?= (int)@filemtime(__DIR__ . '/player.js') ?>"></script>
 
 </body>
 </html>
