@@ -13,8 +13,10 @@ Das Spiel ist online über **InfinityFree** erreichbar:
 | Startseite | In-Game Vergleich |
 | :---: | :---: |
 | ![Startseite](image/PreviewStartseite.png) | ![Gameplay](image/PreviewHigherLowerGame.png) |
-| **Künstler** | **Song-Player** |
-| ![Künstler](image/PreviewArtists.png) | ![Song-Player](image/PreviewSongPlayer.png) |
+| **Künstler** | **Künstler-Detailseite** |
+| ![Künstler](image/PreviewArtists.png) | ![Künstler-Detailseite](image/PreviewArtistDetail.png) |
+| **Song-Player** | |
+| ![Song-Player](image/PreviewSongPlayer.png) | |
 
 ## 🎮 Features
 
