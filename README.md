@@ -59,6 +59,6 @@ Das Projekt ist im Februar 2025 als Gruppenprojekt in der Ausbildung entstanden:
 * Yuki: Startseite ([damaliger Code](https://github.com/melfete/artist1/blob/gruppenversion-2025/index.php))
 * Saltuk Kalender: Song-Player
 
-Danach hat Saltuk Kalender das Projekt weitergeführt und fast alles neu geschrieben: Datenbank, Spiellogik, Startseite, Künstlerseiten, die Anbindung an Deezer und Wikipedia sowie das Design. Vom ursprünglichen Code ist kaum noch etwas übrig. Den kompletten Stand von damals zeigt der Tag [`gruppenversion-2025`](https://github.com/melfete/artist1/tree/gruppenversion-2025).
+Danach hat Saltuk Kalender das Projekt weitergeführt und fast alles neu geschrieben: Datenbank, Spiellogik, Startseite, Künstlerseiten, die Anbindung an Deezer und Wikipedia sowie das Design. Den kompletten Stand von damals zeigt der Tag [`gruppenversion-2025`](https://github.com/melfete/artist1/tree/gruppenversion-2025).
 
 *Fan-Projekt zu Lernzwecken, ohne Verbindung zu Deezer oder Wikipedia.*
