@@ -53,10 +53,12 @@ Die Deezer-IDs stehen fest in `003_external_api.sql`. Bei mehrdeutigen Namen leg
 
 ## Team
 
-Gruppenprojekt aus der Ausbildung:
+Das Projekt ist im Februar 2025 als Gruppenprojekt in der Ausbildung entstanden:
 
-* Saltuk Kalender: Song-Player, später die Überarbeitung des ganzen Projekts
-* Chris: Higher Lower Game
-* Yuki: Startseite
+* Chris: Higher Lower Game ([damaliger Code](https://github.com/melfete/artist1/blob/gruppenversion-2025/higher_lower_game.php))
+* Yuki: Startseite ([damaliger Code](https://github.com/melfete/artist1/blob/gruppenversion-2025/index.php))
+* Saltuk Kalender: Song-Player
+
+Danach hat Saltuk Kalender das Projekt weitergeführt und fast alles neu geschrieben: Datenbank, Spiellogik, Startseite, Künstlerseiten, die Anbindung an Deezer und Wikipedia sowie das Design. Vom ursprünglichen Code ist kaum noch etwas übrig. Den kompletten Stand von damals zeigt der Tag [`gruppenversion-2025`](https://github.com/melfete/artist1/tree/gruppenversion-2025).
 
 *Fan-Projekt zu Lernzwecken, ohne Verbindung zu Spotify, Deezer oder Wikipedia.*
