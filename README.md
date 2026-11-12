@@ -10,13 +10,15 @@ Das Spiel ist online über **InfinityFree** erreichbar:
 
 ## 📸 Preview
 
-| Startseite | In-Game Vergleich |
+| Startseite | Song-Player |
 | :---: | :---: |
-| ![Startseite](image/PreviewStartseite.png) | ![Gameplay](image/PreviewHigherLowerGame.png) |
-| **Künstler** | **Künstler-Detailseite** |
-| ![Künstler](image/PreviewArtists.png) | ![Künstler-Detailseite](image/PreviewArtistDetail.png) |
-| **Song-Player** | |
-| ![Song-Player](image/PreviewSongPlayer.png) | |
+| ![Startseite](image/PreviewStartseite.png) | ![Song-Player](image/PreviewSongPlayer.png) |
+| **Higher Lower Game** | **In-Game Vergleich** |
+| ![Higher Lower Game](image/PreviewGameStart.png) | ![Gameplay](image/PreviewHigherLowerGame.png) |
+| **Game Over** | **Künstler** |
+| ![Game Over](image/PreviewGameOver.png) | ![Künstler](image/PreviewArtists.png) |
+| **Künstler-Detailseite** | |
+| ![Künstler-Detailseite](image/PreviewArtistDetail.png) | |
 
 ## 🎮 Features
 
