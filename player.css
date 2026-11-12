@@ -1,0 +1,211 @@
+/* Song-Player: Leiste am unteren Rand, gleitet beim ersten Song herein (player.js) */
+
+.player {
+    --player-green: #1db954;
+    --player-bg: #181818;
+    --player-dim: #b3b3b3;
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 100;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 2fr) minmax(0, 1fr);
+    align-items: center;
+    gap: 16px;
+    padding: 12px 20px;
+    background: rgba(24, 24, 24, 0.96);
+    backdrop-filter: blur(12px);
+    border-top: 1px solid #2a2a2a;
+    box-shadow: 0 -8px 30px rgba(0, 0, 0, 0.5);
+    color: #fff;
+    font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    transform: translateY(110%);
+    transition: transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.player.is-open { transform: translateY(0); }
+.player[hidden] { display: none; }
+
+/* Platz schaffen, damit die Leiste nichts verdeckt */
+body.player-open { padding-bottom: 96px; }
+
+/* ---- Links: Cover und Titel */
+.player-track {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+}
+.player-cover {
+    width: 56px;
+    height: 56px;
+    border-radius: 6px;
+    object-fit: cover;
+    background: #333;
+    flex-shrink: 0;
+}
+.player-text { min-width: 0; }
+.player-title,
+.player-artist {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.player-title { font-weight: 700; }
+.player-artist { font-size: 0.85rem; color: var(--player-dim); }
+
+/* ---- Mitte: Knöpfe und Fortschritt */
+.player-center {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    min-width: 0;
+}
+.player-buttons {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+}
+.player-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    border: none;
+    border-radius: 50%;
+    background: transparent;
+    color: var(--player-dim);
+    cursor: pointer;
+    transition: color 0.15s, transform 0.15s;
+}
+.player-btn:hover { color: #fff; }
+.player-btn svg { width: 20px; height: 20px; fill: currentColor; }
+.player-btn:focus-visible,
+.player-range:focus-visible,
+.player-link:focus-visible {
+    outline: 2px solid var(--player-green);
+    outline-offset: 2px;
+}
+.player-btn.play {
+    width: 40px;
+    height: 40px;
+    background: #fff;
+    color: #000;
+}
+.player-btn.play:hover { transform: scale(1.06); color: #000; }
+.player-btn.play svg { width: 18px; height: 18px; }
+.player-btn .icon-pause { display: none; }
+.player.is-playing .player-btn .icon-play { display: none; }
+.player.is-playing .player-btn .icon-pause { display: block; }
+.player.is-loading .player-btn.play { opacity: 0.6; }
+
+.player-progress {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    max-width: 520px;
+    font-size: 0.75rem;
+    color: var(--player-dim);
+    font-variant-numeric: tabular-nums;
+}
+.player-progress span { min-width: 32px; text-align: center; }
+
+/* Schieberegler (Fortschritt und Lautstärke): grüner Anteil über --fill */
+.player-range {
+    --fill: 0%;
+    flex: 1;
+    height: 4px;
+    margin: 0;
+    border-radius: 2px;
+    appearance: none;
+    -webkit-appearance: none;
+    background: linear-gradient(to right, #fff var(--fill), #4d4d4d var(--fill));
+    cursor: pointer;
+}
+.player-range:hover { background: linear-gradient(to right, var(--player-green) var(--fill), #4d4d4d var(--fill)); }
+.player-range::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: #fff;
+    opacity: 0;
+    transition: opacity 0.15s;
+}
+.player-range::-moz-range-thumb {
+    width: 12px;
+    height: 12px;
+    border: none;
+    border-radius: 50%;
+    background: #fff;
+    opacity: 0;
+}
+.player-range:hover::-webkit-slider-thumb,
+.player-range:focus-visible::-webkit-slider-thumb { opacity: 1; }
+.player-range:hover::-moz-range-thumb,
+.player-range:focus-visible::-moz-range-thumb { opacity: 1; }
+
+/* ---- Rechts: Lautstärke, Deezer-Link, Schließen */
+.player-extra {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 12px;
+}
+.player-volume { display: flex; align-items: center; gap: 6px; width: 140px; color: var(--player-dim); }
+.player-volume svg { width: 18px; height: 18px; fill: currentColor; flex-shrink: 0; }
+/* Ohne min-width: 0 behält der Regler seine Standardbreite und ragt über den Deezer-Button */
+.player-volume .player-range { width: 100%; min-width: 0; }
+.player-volume,
+.player-link { flex-shrink: 0; }
+.player-link {
+    color: var(--player-dim);
+    font-size: 0.8rem;
+    text-decoration: none;
+    white-space: nowrap;
+    border: 1px solid #444;
+    border-radius: 50px;
+    padding: 5px 12px;
+    transition: color 0.15s, border-color 0.15s;
+}
+.player-link:hover { color: #fff; border-color: #fff; }
+.player-message {
+    font-size: 0.75rem;
+    color: #f1a7b9;
+    min-height: 1em;
+}
+
+/* ---- Handy: eine Zeile mit Cover, Titel und Play; Fortschritt als dünner Balken oben */
+@media (max-width: 700px) {
+    .player {
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 10px;
+        padding: 10px 16px 12px;
+    }
+    .player-center { flex-direction: row; }
+    .player-buttons { gap: 6px; }
+    .player-btn.prev { display: none; }
+    .player-progress {
+        position: absolute;
+        left: 0;
+        right: 0;
+        top: -2px;
+        max-width: none;
+    }
+    .player-progress span { display: none; }
+    .player-progress .player-range { border-radius: 0; }
+    .player-volume,
+    .player-link { display: none; }
+    .player-extra { position: absolute; top: 6px; right: 6px; }
+    .player-extra .player-btn { width: 28px; height: 28px; }
+    .player-center { margin-right: 26px; }
+    body.player-open { padding-bottom: 84px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .player { transition: none; }
+}

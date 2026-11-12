@@ -362,11 +362,15 @@ function cache_set(mysqli $conn, string $key, array $data): void
  * Die 10 ersten Songs der Deezer-Playlist „Top Worldwide“, einmal am Tag neu geladen.
  * Bei einem Fehler die zuletzt gespeicherte Liste; null, wenn es noch keine gibt.
  *
- * @return list<array{title:string, artist:string, link:?string}>|null
+ * Die Vorschau-MP3 wird NICHT gecacht: Deezer signiert die Links nur für ca. 15 Minuten,
+ * deshalb holt preview.php sie erst beim Abspielen frisch.
+ *
+ * @return list<array{id:int, title:string, artist:string, link:?string, cover:?string}>|null
  */
 function top_tracks(mysqli $conn): ?array
 {
-    $cached = cache_get($conn, 'top_tracks');
+    // v2: seit dem Player mit id und cover (alte Einträge ohne diese Felder werden ignoriert)
+    $cached = cache_get($conn, 'top_tracks_v2');
     if ($cached && !cache_expired($cached['updated_at'], TOP_TRACKS_TTL)) {
         return $cached['data'];
     }
@@ -374,17 +378,19 @@ function top_tracks(mysqli $conn): ?array
     $response = api_get_json('https://api.deezer.com/playlist/' . TOP_TRACKS_PLAYLIST . '/tracks?limit=10');
     $tracks = [];
     foreach ($response['data'] ?? [] as $track) {
-        if (isset($track['title'], $track['artist']['name'])) {
+        if (isset($track['id'], $track['title'], $track['artist']['name'])) {
             $tracks[] = [
+                'id'     => (int)$track['id'],
                 'title'  => (string)$track['title'],
                 'artist' => (string)$track['artist']['name'],
                 'link'   => https_url_or_null($track['link'] ?? null),
+                'cover'  => https_url_or_null($track['album']['cover_medium'] ?? null),
             ];
         }
     }
 
     if ($tracks) {
-        cache_set($conn, 'top_tracks', $tracks);
+        cache_set($conn, 'top_tracks_v2', $tracks);
         return $tracks;
     }
     return $cached['data'] ?? null;
