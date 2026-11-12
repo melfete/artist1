@@ -1,4 +1,4 @@
-# Spotify Higher Lower Game
+# Artist Quiz – Higher Lower Game
 
 Ein Web-Spiel über Musik-Künstler: Du rätst, welcher von zwei Künstlern mehr Fans hat. Dazu gibt es eine Künstler-Übersicht mit Detailseiten und aktuelle Charts, deren Songs man direkt auf der Startseite anhören kann. Das Projekt läuft auf einem normalen PHP-Webserver.
 

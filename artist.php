@@ -32,7 +32,7 @@ if (!$artist) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?= e($artist['name'] ?? 'Künstler nicht gefunden') ?></title>
+    <title><?= e($artist['name'] ?? 'Künstler nicht gefunden') ?> | Artist Quiz</title>
     <link rel="stylesheet" href="artist.css">
 </head>
 <body>

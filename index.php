@@ -23,12 +23,12 @@ if (!$carouselArtists) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Spotify Artist Website</title>
+    <title>Artist Quiz – Wer hat mehr Fans?</title>
     <?php // ?v=Änderungszeit: nach einem Update laden Browser/Server-Cache die neue Datei sofort ?>
     <link rel="stylesheet" href="player.css?v=<?= (int)@filemtime(__DIR__ . '/player.css') ?>">
     <style>
         :root {
-            --spotify-green: #1db954;
+            --brand-green: #1db954;
             --bg-dark: #121212;
             --card-bg: #181818;
             --card-hover: #282828;
@@ -49,7 +49,7 @@ if (!$carouselArtists) {
             text-align: center;
             margin-top: 40px;
             font-size: 2.5rem;
-            color: var(--spotify-green);
+            color: var(--brand-green);
         }
 
         .button-container {
@@ -72,7 +72,7 @@ if (!$carouselArtists) {
             display: inline-block;
         }
 
-        .game-button { background-color: var(--spotify-green); color: white; }
+        .game-button { background-color: var(--brand-green); color: white; }
         .artist-button { background-color: #333; color: white; }
 
         .nav-button:hover {
@@ -137,7 +137,7 @@ if (!$carouselArtists) {
         }
 
         .news-column h2 {
-            color: var(--spotify-green);
+            color: var(--brand-green);
             border-bottom: 1px solid #333;
             padding-bottom: 10px;
             margin-top: 0;
@@ -152,7 +152,7 @@ if (!$carouselArtists) {
 
         .news-item:last-child { border-bottom: none; }
 
-        .rank { color: var(--spotify-green); font-weight: bold; margin-right: 10px; }
+        .rank { color: var(--brand-green); font-weight: bold; margin-right: 10px; }
         .name { flex-grow: 1; }
         .detail { color: var(--text-dim); font-size: 0.9rem; }
         .name a { color: inherit; text-decoration: none; }
@@ -179,7 +179,7 @@ if (!$carouselArtists) {
             transition: background 0.15s;
         }
         .news-item.is-clickable:hover { background: rgba(255,255,255,0.07); }
-        .news-item.is-clickable:focus-visible { outline: 2px solid var(--spotify-green); outline-offset: -2px; }
+        .news-item.is-clickable:focus-visible { outline: 2px solid var(--brand-green); outline-offset: -2px; }
         .news-item.is-clickable .rank { margin-right: 0; min-width: 2.2em; }
 
         /* Songs: Platz → Play-Symbol beim Hovern, grün beim laufenden Song */
@@ -204,7 +204,7 @@ if (!$carouselArtists) {
         .song:hover .song-play,
         .song.is-current .song-play { display: inline; }
         .song.is-current .name,
-        .song.is-current .song-play { color: var(--spotify-green); }
+        .song.is-current .song-play { color: var(--brand-green); }
 
         #faq {
             max-width: 800px;
@@ -365,7 +365,7 @@ if (!$carouselArtists) {
 </div>
 
 <footer>
-    &copy; <?php echo date("Y"); ?> Spotify Artist Project
+    &copy; <?php echo date("Y"); ?> Artist Quiz
 </footer>
 
 <script>

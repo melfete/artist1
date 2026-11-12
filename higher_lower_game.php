@@ -101,19 +101,19 @@ $isGameOver = isset($_SESSION["game_over"]) && $_SESSION["game_over"] === true;
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Higher Lower Game</title>
+    <title>Higher Lower Game | Artist Quiz</title>
     <style>
         :root {
-            --spotify-green: #1db954;
-            --spotify-black: #121212;
-            --spotify-grey: #181818;
-            --spotify-light-grey: #282828;
+            --brand-green: #1db954;
+            --brand-black: #121212;
+            --brand-grey: #181818;
+            --brand-light-grey: #282828;
             --error-red: #e91e63;
         }
 
         body {
             font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            background-color: var(--spotify-black);
+            background-color: var(--brand-black);
             color: white;
             margin: 0;
             display: flex;
@@ -127,7 +127,7 @@ $isGameOver = isset($_SESSION["game_over"]) && $_SESSION["game_over"] === true;
         .score-display {
             font-size: 1.5rem;
             margin-bottom: 20px;
-            background: var(--spotify-green);
+            background: var(--brand-green);
             padding: 10px 30px;
             border-radius: 50px;
             font-weight: bold;
@@ -150,7 +150,7 @@ $isGameOver = isset($_SESSION["game_over"]) && $_SESSION["game_over"] === true;
             min-width: 300px;
             text-align: center; 
             padding: 30px;
-            background: var(--spotify-grey);
+            background: var(--brand-grey);
             border-radius: 15px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.5);
             transition: transform 0.3s ease;
@@ -182,7 +182,7 @@ $isGameOver = isset($_SESSION["game_over"]) && $_SESSION["game_over"] === true;
 
         .streams { 
             font-size: 2rem; 
-            color: var(--spotify-green); 
+            color: var(--brand-green); 
             font-weight: 800; 
         }
 
@@ -226,7 +226,7 @@ $isGameOver = isset($_SESSION["game_over"]) && $_SESSION["game_over"] === true;
             display: inline-block;
         }
 
-        .btn-higher { background-color: var(--spotify-green); color: white; }
+        .btn-higher { background-color: var(--brand-green); color: white; }
         .btn-lower { background-color: var(--error-red); color: white; }
         
         button:hover, .btn-link:hover { transform: scale(1.05); filter: brightness(1.1); }
@@ -243,7 +243,7 @@ $isGameOver = isset($_SESSION["game_over"]) && $_SESSION["game_over"] === true;
         }
 
         .game-over-card {
-            background: var(--spotify-grey);
+            background: var(--brand-grey);
             padding: 50px;
             border-radius: 25px;
             text-align: center;
@@ -260,7 +260,7 @@ $isGameOver = isset($_SESSION["game_over"]) && $_SESSION["game_over"] === true;
         }
 
         .game-over-card h2 { color: var(--error-red); font-size: 3.5rem; margin: 0; font-weight: 900; }
-        .final-score { font-size: 6rem; font-weight: 900; margin: 10px 0; color: var(--spotify-green); line-height: 1; }
+        .final-score { font-size: 6rem; font-weight: 900; margin: 10px 0; color: var(--brand-green); line-height: 1; }
         
         .action-buttons {
             display: flex;
@@ -269,8 +269,8 @@ $isGameOver = isset($_SESSION["game_over"]) && $_SESSION["game_over"] === true;
             margin-top: 35px;
         }
 
-        .btn-restart { background: var(--spotify-green); color: white; }
-        .btn-secondary { background: var(--spotify-light-grey); color: white; }
+        .btn-restart { background: var(--brand-green); color: white; }
+        .btn-secondary { background: var(--brand-light-grey); color: white; }
 
         @media (max-width: 768px) {
             .game-container { flex-direction: column; align-items: center; }

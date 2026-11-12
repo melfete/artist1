@@ -14,7 +14,7 @@ $conn->close();
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Alle Künstler</title>
+    <title>Alle Künstler | Artist Quiz</title>
     <style>
         body {
             font-family: 'Segoe UI', Arial, sans-serif;

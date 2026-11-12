@@ -7,19 +7,19 @@ start_secure_session();
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Higher Lower Game - Start</title>
+    <title>Higher Lower Game – Start | Artist Quiz</title>
     <style>
         :root {
-            --spotify-green: #1db954;
-            --spotify-black: #121212;
-            --spotify-grey: #181818;
+            --brand-green: #1db954;
+            --brand-black: #121212;
+            --brand-grey: #181818;
             --text-main: #ffffff;
             --text-dim: #b3b3b3;
         }
 
         body {
             font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            background-color: var(--spotify-black);
+            background-color: var(--brand-black);
             color: var(--text-main);
             margin: 0;
             display: flex;
@@ -32,7 +32,7 @@ start_secure_session();
         .container {
             max-width: 600px;
             padding: 40px;
-            background: var(--spotify-grey);
+            background: var(--brand-grey);
             border-radius: 20px;
             box-shadow: 0 15px 50px rgba(0,0,0,0.5);
             margin: 20px;
@@ -57,7 +57,7 @@ start_secure_session();
         }
 
         .highlight {
-            color: var(--spotify-green);
+            color: var(--brand-green);
         }
 
         .highlight.lower {
@@ -86,7 +86,7 @@ start_secure_session();
         }
 
         .playbutton {
-            background-color: var(--spotify-green);
+            background-color: var(--brand-green);
             color: white;
             padding: 18px 60px;
             font-size: 1.3rem;
