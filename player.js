@@ -181,7 +181,7 @@
     vol.addEventListener('input', function () {
         audio.volume = parseFloat(vol.value);
         setFill(vol);
-        try { localStorage.setItem('playerVolume', vol.value); } catch (e) { /* egal */ }
+        try { localStorage.setItem('playerVolume', vol.value); } catch (e) { /* Speichern nicht möglich: ignorieren */ }
     });
 
     // ---- Audio-Ereignisse

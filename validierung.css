@@ -74,42 +74,42 @@ body {
 
 /* Gemeinsames Styling für beide Felder */
 input[type="text"], input[type="number"] {
-    padding: 12px 20px; /* Innenabstand */
-    font-size: 16px; /* Schriftgröße */
-    width: 40%; /* Füllt den Container aus */
-    border: 2px solid #ccc; /* Standard Rand */
-    border-radius: 10px; /* Abgerundete Ecken */
-    background-color: #f9f9f9; /* Heller Hintergrund */
-    color: #333; /* Textfarbe */
-    transition: all 0.3s ease; /* Weicher Übergang für Focus und Hover */
-    margin: 10px 0; /* Abstand nach oben und unten */
-    box-sizing: border-box; /* Padding und Border zählen zur Gesamtbreite */
+    padding: 12px 20px;
+    font-size: 16px;
+    width: 40%;
+    border: 2px solid #ccc;
+    border-radius: 10px;
+    background-color: #f9f9f9;
+    color: #333;
+    transition: all 0.3s ease;
+    margin: 10px 0;
+    box-sizing: border-box;
 }
 
 /* Focus-Effekt */
 input[type="text"]:focus, input[type="number"]:focus {
-    border-color: #7a0404; /* Randfarbe bei Fokus */
-    box-shadow: 0 0 8px rgba(65, 10, 10, 0.4); /* Sanfter Schatten */
-    background-color: #eafaf1; /* Hellerer Hintergrund beim Fokus */
-    outline: none; /* Entfernt den Standard-Fokusrahmen */
+    border-color: #7a0404;
+    box-shadow: 0 0 8px rgba(65, 10, 10, 0.4);
+    background-color: #eafaf1;
+    outline: none;
 }
 
 /* Hover-Effekt */
 input[type="text"]:hover, input[type="number"]:hover {
-    border-color: #530505; /* Randfarbe beim Hover */
-    background-color: #f0f9ff; /* Hellerer Hintergrund beim Hover */
+    border-color: #530505;
+    background-color: #f0f9ff;
 }
 
 /* Placeholder-Styling */
 input[type="text"]::placeholder, input[type="number"]::placeholder {
-    color: #313131; /* Farbe des Platzhalters */
-    font-style: italic; /* Kursivschrift für den Platzhalter */
-    opacity: 0.8; /* Leicht transparent */
+    color: #313131;
+    font-style: italic;
+    opacity: 0.8;
 }
 
-/* Focus auf Placeholder (wenn das Feld fokussiert wird, ändert sich der Platzhalter) */
+/* Focus auf Placeholder */
 input[type="text"]:focus::placeholder, input[type="number"]:focus::placeholder {
-    color: #440202; /* Platzhalterfarbe bei Fokus */
-    opacity: 1; /* Vollständig sichtbar */
+    color: #440202;
+    opacity: 1;
 }
 
